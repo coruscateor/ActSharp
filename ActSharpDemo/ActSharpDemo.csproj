@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ActSharp.System\ActSharp.System.csproj" />
+    <ProjectReference Include="..\ActSharp\ActSharp.csproj" />
+  </ItemGroup>
+
+</Project>

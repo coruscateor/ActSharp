@@ -1,0 +1,10 @@
+bin/
+obj/
+Backup/
+.vs/
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.pidb.orig
+*.csproj.user
