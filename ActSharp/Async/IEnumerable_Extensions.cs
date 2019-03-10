@@ -10,7 +10,7 @@ namespace ActSharp.Async
     public static class IEnumerable_Extensions
     {
 
-        //Tasks
+        //Tasks -- WaitAll
 
         public static void WaitAll(this IEnumerable<Task> items)
         {
@@ -175,6 +175,37 @@ namespace ActSharp.Async
             }
 
         }
+
+        //Tasks -- WaitAny
+
+        public static void WaitAny(this IEnumerable<Task> items)
+        {
+
+            foreach (var item in items)
+            {
+
+                if (!item.IsCompleted && item.Wait(-1))
+                    return;
+
+            }
+
+        }
+
+        //IActorTasks -- WaitAny
+
+        public static void WaitAny(this IEnumerable<IActorTask> items)
+        {
+
+            foreach (var item in items)
+            {
+                
+                if (!item.IsCompleted && item.Wait(-1))
+                    return;
+
+            }
+
+        }
+
 
     }
 

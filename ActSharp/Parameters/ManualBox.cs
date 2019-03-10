@@ -5,7 +5,7 @@ using System.Text;
 namespace ActSharp.Parameters
 {
 
-    public class Ref<T>
+    public class ManualBox<T>
         where T : struct
     {
 
@@ -14,6 +14,13 @@ namespace ActSharp.Parameters
 
             get;
             set;
+
+        }
+
+        public void SetDefault()
+        {
+
+            Value = default(T);
 
         }
 

@@ -11,39 +11,39 @@ using ActSharp;
 namespace ActSharpDemoImplementation
 {
 
-    sealed class DemoActor : Actor
-    {
+	sealed class DemoActor : Actor
+	{
 
-        public DemoActor()
-        {
-        }
+		public DemoActor()
+		{
+		}
 
 		public ActorTask HelloWorld()
-        {
+		{
 
-            ActorEnqueueDelegate(() => Console.WriteLine("Hello World!"));
+			ActorEnqueueDelegate(() => Console.WriteLine("Hello World!"));
 
-        }
+		}
 
-        public ActorTask<int> TwoPlusTwo()
-        {
+		public ActorTask<int> TwoPlusTwo()
+		{
 
-            return ActorEnqueueDelegate(() => 2 + 2);
+			return ActorEnqueueDelegate(() => 2 + 2);
 
-        }
+		}
 
-        public ActorTask<int> Add(int a, int b)
-        {
+		public ActorTask<int> Add(int a, int b)
+		{
 
-            return ActorEnqueueDelegate(() => {
+			return ActorEnqueueDelegate(() => {
 
-                return a + b;
+				return a + b;
 
-            });
+			});
 
-        }
+		}
 
-    }
+	}
 
 }
 ```
@@ -101,11 +101,22 @@ Usage:
 As indicated by the example ActSharp.Async is an extension method namespace for executing delegates on thread pool threads.
 
 
+Added in version 0.1.1:
+
+* Added void returning overrides for methods that return Task and ActorTask
+* Fixed Readme formatting
+
+
 
 #### Likely Todos:
 
-* Add ref and out parameter permutations to the ActSharp.Async delegate extensions.
-* Add ref and out parameter permutations to the ActorEnqueueDelegate method overloads in the Actor class.
+* Added more void returning overrides
+* Added ContinuationContext to RetainedTaskList for more fine-grained control over where a continuation takes place
+
+#### Un-likely Todos:
+
+* Add ref and out parameter permutations to the ActSharp.Async delegate extensions
+* Add ref and out parameter permutations to the ActorEnqueueDelegate method overloads in the Actor class
 
 
 

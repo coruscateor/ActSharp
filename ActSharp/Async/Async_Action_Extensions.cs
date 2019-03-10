@@ -169,6 +169,73 @@ namespace ActSharp.Async
 
         }
 
+        //Returning void
+
+        public static void AsyncIgnore(this Action action)
+        {
+
+            ThreadPool.UnsafeQueueUserWorkItem((obj) =>
+            {
+
+                try
+                {
+
+                    action();
+
+                }
+                catch
+                {
+                }
+
+            }, null);
+
+        }
+
+        public static void AsyncFailFast(this Action action)
+        {
+
+            ThreadPool.UnsafeQueueUserWorkItem((obj) => {
+
+                try
+                {
+
+                    action();
+
+                }
+                catch(Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.AsyncFailFast Exception", e);
+
+                }
+
+            }, null);
+
+        }
+
+        public static void Async(this Action action, Action<Exception> exceptionAction)
+        {
+
+            ThreadPool.UnsafeQueueUserWorkItem((obj) =>
+            {
+
+                try
+                {
+
+                    action();
+
+                }
+                catch(Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null);
+
+        }
+
     }
 
 }

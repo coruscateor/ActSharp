@@ -603,31 +603,31 @@ namespace ActSharp
 
         //Retained Tasks
 
-        protected void ActorRetain(Task task, Action<Task> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
+        protected void ActorRetain(Task task, Action<Task> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
-            myRetainedTaskList.Add(task, action, continueInActorContext, prerequisites);
+            myRetainedTaskList.Add(task, action, continuationContext, prerequisites);
 
         }
 
-        protected void ActorRetain<T>(Task<T> task, Action<Task<T>> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
+        protected void ActorRetain<T>(Task<T> task, Action<Task<T>> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
-            myRetainedTaskList.Add(task, action, continueInActorContext, prerequisites);
+            myRetainedTaskList.Add(task, action, continuationContext, prerequisites);
 
         }
 
-        protected void ActorRetain(ActorTask task, Action<ActorTask> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
+        protected void ActorRetain(ActorTask task, Action<ActorTask> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
-            myRetainedTaskList.Add(task, action, continueInActorContext, prerequisites);
+            myRetainedTaskList.Add(task, action, continuationContext, prerequisites);
 
         }
 
-        protected void ActorRetain<T>(ActorTask<T> task, Action<ActorTask<T>> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
+        protected void ActorRetain<T>(ActorTask<T> task, Action<ActorTask<T>> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
-            myRetainedTaskList.Add(task, action, continueInActorContext, prerequisites);
+            myRetainedTaskList.Add(task, action, continuationContext, prerequisites);
 
         }
 
@@ -696,8 +696,6 @@ namespace ActSharp
         //}
 
         //Method Enqueueing
-
-        //<TActor>
 
         //Actions
 
@@ -797,6 +795,134 @@ namespace ActSharp
         {
 
             return ActorEnqueueDelegate(() => { action(p1, p2, p3, p4, p5, p6, p7, p8); });
+
+        }
+
+        //Returning void
+
+        //Ignoring the Exception
+
+        protected void ActorEnqueueDelegateIgnore(Action action)
+        {
+
+            Task t = new Task(() => {
+
+                SetManagedThreadId();
+
+                if (!myOnIdleEvent.IsSet)
+                    myOnIdleEvent.Reset();
+
+                //CheckIsDone();
+
+                myRetainedTaskList.Check();
+
+                try
+                {
+
+                    action();
+
+                }
+                finally
+                {
+
+                    RemoveCurrentTask();
+
+                    NextTask();
+
+                }
+
+            });
+
+            SetupTask(t);
+
+            myRetainedTaskList.Add(t);
+
+        }
+
+        //FailFast if Exception is thrown
+
+        protected void ActorEnqueueDelegateFailFast(Action action)
+        {
+
+            Task t = new Task(() => {
+
+                SetManagedThreadId();
+
+                if (!myOnIdleEvent.IsSet)
+                    myOnIdleEvent.Reset();
+
+                //CheckIsDone();
+
+                myRetainedTaskList.Check();
+
+                try
+                {
+
+                    action();
+
+                }
+                finally
+                {
+
+                    RemoveCurrentTask();
+
+                    NextTask();
+
+                }
+
+            });
+
+            SetupTask(t);
+
+            myRetainedTaskList.Add(t, (task) => {
+
+                if(task.Exception != null)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Actor Exception", task.Exception);
+
+                }
+
+            }, ContinuationContext.Immediate);
+
+        }
+
+        //Call continuation action if Exception is thrown
+
+        protected void ActorEnqueueDelegate(Action action, Action<Task> continuationAction, ContinuationContext continuationContext = ContinuationContext.Immediate)
+        {
+
+            Task t = new Task(() => {
+
+                SetManagedThreadId();
+
+                if (!myOnIdleEvent.IsSet)
+                    myOnIdleEvent.Reset();
+
+                //CheckIsDone();
+
+                myRetainedTaskList.Check();
+
+                try
+                {
+
+                    action();
+
+                }
+                finally
+                {
+
+                    RemoveCurrentTask();
+
+                    NextTask();
+
+                }
+
+            });
+
+            SetupTask(t);
+
+            myRetainedTaskList.Add(t, continuationAction, continuationContext);
 
         }
 

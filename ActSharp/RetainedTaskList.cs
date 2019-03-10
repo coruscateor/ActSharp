@@ -10,20 +10,19 @@ using ActSharp.Async;
 namespace ActSharp
 {
 
+    /// <summary>
+    /// For retaining task objects beyond the lifetime of any given method call.
+    /// </summary>
     public class RetainedTaskList
     {
-
-        //: IEnumerable<Task>, IEnumerable
 
         List<ITaskHolder> myTasks;
 
         //Execute any provided delegates on other threads if relevant
 
-        //readonly bool myContinueOnCurrentThread;
-
         ConcurrentQueue<Task> myActorExQueue;
 
-        public RetainedTaskList(ConcurrentQueue<Task> actorExQueue) //(bool continueOnCurrentThread = false)
+        public RetainedTaskList(ConcurrentQueue<Task> actorExQueue)
         {
 
             myTasks = new List<ITaskHolder>(0);
@@ -34,51 +33,39 @@ namespace ActSharp
 
         }
 
-        //public void Add(Task task, Action<Task> onCompleted = null, Action<Task> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
-        public void Add(Task task, Action<Task> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
+        public void Add(Task task, Action<Task> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
             CheckTaskIsScheduled(task);
 
-            //myTasks.Add(new TaskHolder(task, myTasks, onCompleted, onError, continueOnCurrentThread, prerequisites));
-
-            myTasks.Add(new TaskHolder(task, action, continueInActorContext, prerequisites));
+            myTasks.Add(new TaskHolder(task, action, continuationContext, prerequisites));
 
         }
 
-        //public void Add<T>(Task<T> task, Action<Task<T>> onCompleted = null, Action<Task<T>> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
-        public void Add<T>(Task<T> task, Action<Task<T>> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
+        public void Add<T>(Task<T> task, Action<Task<T>> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
             CheckTaskIsScheduled(task);
 
-            //myTasks.Add(new TaskHolder<T>(task, myTasks, onCompleted, onError, continueOnCurrentThread, prerequisites));
-
-            myTasks.Add(new TaskHolder<T>(task, action, continueInActorContext, prerequisites));
+            myTasks.Add(new TaskHolder<T>(task, action, continuationContext, prerequisites));
 
         }
 
-        //public void Add(ActorTask task, Action<ActorTask> onCompleted = null, Action<ActorTask> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
-        public void Add(ActorTask task, Action<ActorTask> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
+        public void Add(ActorTask task, Action<ActorTask> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
             CheckTaskIsScheduled(task);
 
-            //myTasks.Add(new ActorTaskHolder(task, myTasks, onCompleted, onError, continueOnCurrentThread, prerequisites));
-
-            myTasks.Add(new ActorTaskHolder(task, action, continueInActorContext, prerequisites));
+            myTasks.Add(new ActorTaskHolder(task, action, continuationContext, prerequisites));
 
         }
-
-        //public void Add<T>(ActorTask<T> task, Action<ActorTask<T>> onCompleted = null, Action<ActorTask<T>> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
-        public void Add<T>(ActorTask<T> task, Action<ActorTask<T>> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
+        
+        public void Add<T>(ActorTask<T> task, Action<ActorTask<T>> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
             CheckTaskIsScheduled(task);
 
-            //myTasks.Add(new ActorTaskHolder<T>(task, myTasks, onCompleted, onError, continueOnCurrentThread, prerequisites));
-
-            myTasks.Add(new ActorTaskHolder<T>(task, action, continueInActorContext, prerequisites));
+            myTasks.Add(new ActorTaskHolder<T>(task, action, continuationContext, prerequisites));
 
         }
 
@@ -147,17 +134,6 @@ namespace ActSharp
                 throw new TaskNotScheduledException();
 
         }
-
-        //public bool ContinueOnCurrentThread
-        //{
-
-        //    get
-        //    {
-        //        return myContinueOnCurrentThread;
-
-        //    }
-
-        //}
 
         public int Count
         {
@@ -254,14 +230,16 @@ namespace ActSharp
 
             readonly Action<TTask> myAction;
 
-            readonly bool myContinueInActorContext;
+            //readonly bool myContinueInActorContext;
+
+            readonly ContinuationContext myContinuationContext;
 
             readonly IEnumerable<IAsyncResult> myPrerequisites;
 
             /*, List<ITaskHolder> tasks*/
 
             //public BaseTaskHolder(TTask task, Action<TTask> onCompleted = null, Action<TTask> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
-            public BaseTaskHolder(TTask task, Action<TTask> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
+            public BaseTaskHolder(TTask task, Action<TTask> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
             {
 
                 myTask = task;
@@ -276,7 +254,7 @@ namespace ActSharp
 
                 myAction = action;
 
-                myContinueInActorContext = continueInActorContext;
+                myContinuationContext = continuationContext;
 
                 myPrerequisites = prerequisites;
 
@@ -348,20 +326,26 @@ namespace ActSharp
                     if (myAction != null)
                     {
 
-                        if (myContinueInActorContext)
+                        switch(myContinuationContext)
                         {
 
-                            //Add to actor execution queue
+                            case ContinuationContext.Actor:
 
-                            actorExQueue.Enqueue(new Task(() => { myAction(myTask); }));
+                                actorExQueue.Enqueue(new Task(() => { myAction(myTask); }));
 
-                        }
-                        else
-                        {
+                                break;
 
-                            //Run asynchronously
+                            case ContinuationContext.Async:
 
-                            tasks.Add(new TaskHolder(myAction.Async(myTask)));
+                                tasks.Add(new TaskHolder(myAction.Async(myTask)));
+
+                                break;
+
+                            case ContinuationContext.Immediate:
+
+                                myAction(myTask);
+
+                                break;
 
                         }
 
@@ -371,60 +355,6 @@ namespace ActSharp
 
                 }
 
-                //if (myTask.IsCompleted && CheckPrerequisites())
-                //{
-
-                //    if (IsFaulted(myTask))
-                //    {
-
-                //        if (myOnError != null)
-                //        {
-
-                //            if (myContinueOnCurrentThread)
-                //            {
-
-                //                myOnError(myTask);
-
-                //            }
-                //            else
-                //            {
-
-                //                tasks.Add(new TaskHolder(myOnError.Async(myTask), tasks));
-
-                //            }
-
-                //        }
-
-                //        //Ignore error?
-
-                //    }
-                //    else
-                //    {
-
-                //        if (myOnCompleted != null)
-                //        {
-
-                //            if (myContinueOnCurrentThread)
-                //            {
-
-                //                myOnCompleted(myTask);
-
-                //            }
-                //            else
-                //            {
-
-                //                tasks.Add(new TaskHolder(myOnCompleted.Async(myTask), tasks));
-
-                //            }
-
-                //        }
-
-                //    }
-
-                //    return true;
-
-                //}
-
                 return false;
 
             }
@@ -432,43 +362,6 @@ namespace ActSharp
             public abstract bool Has(Task task);
 
             public abstract bool Has(IActorTask task);
-
-            //public bool Check()
-            //{
-
-            //    if (myTask.IsCompleted)
-            //    {
-
-            //        if (myTask.IsFaulted)
-            //        {
-
-            //            if (myOnError != null)
-            //            {
-
-            //                myTasks.Add(new TaskHolder(myOnError.Async(myTask), myTasks));
-
-            //            }
-
-            //        }
-            //        else
-            //        {
-
-            //            if (myOnError != null)
-            //            {
-
-            //                myTasks.Add(new TaskHolder(myOnCompleted.Async(myTask), myTasks));
-
-            //            }
-
-            //        }
-
-            //        return true;
-
-            //    }
-
-            //    return false;
-
-            //}
 
         }
 
@@ -480,8 +373,8 @@ namespace ActSharp
             //{
             //}
 
-            public TaskHolder(Task task, Action<Task> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
-                : base(task, action, continueInActorContext, prerequisites)
+            public TaskHolder(Task task, Action<Task> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+                : base(task, action, continuationContext, prerequisites)
             {
             }
 
@@ -509,8 +402,8 @@ namespace ActSharp
             //{
             //}
 
-            public TaskHolder(Task<TResult> task, Action<Task<TResult>> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
-                : base(task, action, continueInActorContext, prerequisites)
+            public TaskHolder(Task<TResult> task, Action<Task<TResult>> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+                : base(task, action, continuationContext, prerequisites)
             {
             }
 
@@ -538,8 +431,8 @@ namespace ActSharp
             //{
             //}
 
-            public ActorTaskHolder(ActorTask task, Action<ActorTask> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
-                : base(task, action, continueInActorContext, prerequisites)
+            public ActorTaskHolder(ActorTask task, Action<ActorTask> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+                : base(task, action, continuationContext, prerequisites)
             {
             }
 
@@ -567,8 +460,8 @@ namespace ActSharp
             //{
             //}
 
-            public ActorTaskHolder(ActorTask<TResult> task, Action<ActorTask<TResult>> action = null, bool continueInActorContext = false, IEnumerable<IAsyncResult> prerequisites = null)
-                : base(task, action, continueInActorContext, prerequisites)
+            public ActorTaskHolder(ActorTask<TResult> task, Action<ActorTask<TResult>> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+                : base(task, action, continuationContext, prerequisites)
             {
             }
 

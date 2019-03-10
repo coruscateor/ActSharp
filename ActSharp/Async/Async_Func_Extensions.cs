@@ -12,7 +12,7 @@ namespace ActSharp.Async
     public static class Async_Func_Extensions
     {
 
-        public static Task<T> Async<T>(this Func<T> func)
+        public static Task<TResult> Async<TResult>(this Func<TResult> func)
         {
 
             return Task.Factory.StartNew(func);
