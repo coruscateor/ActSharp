@@ -101,17 +101,19 @@ Usage:
 As indicated by the example ActSharp.Async is an extension method namespace for executing delegates on thread pool threads.
 
 
-Added in version 0.1.1:
+
+### Changelog:
+
+Version 0.1.1:
 
 * Added void returning overrides for methods that return Task and ActorTask
-* Fixed Readme formatting
+* Added ContinuationContext to RetainedTaskList for more fine-grained control over where a continuation takes place
 
 
 
 #### Likely Todos:
 
-* Added more void returning overrides
-* Added ContinuationContext to RetainedTaskList for more fine-grained control over where a continuation takes place
+* Add more void returning overrides
 
 #### Un-likely Todos:
 
