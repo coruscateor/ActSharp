@@ -695,6 +695,14 @@ namespace ActSharp
 
         //}
 
+        private void ResetOnIdleEvent()
+        {
+
+            if (!myOnIdleEvent.IsSet)
+                myOnIdleEvent.Reset();
+
+        }
+
         //Method Enqueueing
 
         //Actions
@@ -704,10 +712,9 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                ResetOnIdleEvent();
 
-                if (!myOnIdleEvent.IsSet)
-                    myOnIdleEvent.Reset();
+                SetManagedThreadId();
 
                 //CheckIsDone();
 
@@ -807,10 +814,9 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                ResetOnIdleEvent();
 
-                if (!myOnIdleEvent.IsSet)
-                    myOnIdleEvent.Reset();
+                SetManagedThreadId();
 
                 //CheckIsDone();
 
@@ -846,10 +852,9 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                ResetOnIdleEvent();
 
-                if (!myOnIdleEvent.IsSet)
-                    myOnIdleEvent.Reset();
+                SetManagedThreadId();
 
                 //CheckIsDone();
 
@@ -894,10 +899,9 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                ResetOnIdleEvent();
 
-                if (!myOnIdleEvent.IsSet)
-                    myOnIdleEvent.Reset();
+                SetManagedThreadId();
 
                 //CheckIsDone();
 
@@ -933,10 +937,9 @@ namespace ActSharp
 
             Task<TResult> t = new Task<TResult>(() => {
 
-                SetManagedThreadId();
+                ResetOnIdleEvent();
 
-                if (!myOnIdleEvent.IsSet)
-                    myOnIdleEvent.Reset();
+                SetManagedThreadId();
 
                 myRetainedTaskList.Check();
 
@@ -1029,6 +1032,212 @@ namespace ActSharp
 
         }
 
+        //ActorEnqueueDelegate with no RetainedTaskList check
+
+        protected ActorTask ActorEnqueueDelegateNoTaskListCheck(Action action)
+        {
+
+            Task t = new Task(() => {
+
+                ResetOnIdleEvent();
+
+                SetManagedThreadId();
+
+                try
+                {
+
+                    action();
+
+                }
+                finally
+                {
+
+                    RemoveCurrentTask();
+
+                    //Now seen as not executing
+
+                    //CheckIsDone();
+
+                    NextTask();
+
+                }
+
+            });
+
+            ActorTask at = new ActorTask(t); //, this);
+
+            SetupTask(t);
+
+            return at;
+
+        }
+
+        //Returning void
+
+        //Ignoring the Exception
+
+        protected void ActorEnqueueDelegateIgnoreNoTaskListCheck(Action action)
+        {
+
+            Task t = new Task(() => {
+
+                ResetOnIdleEvent();
+
+                SetManagedThreadId();
+
+                try
+                {
+
+                    action();
+
+                }
+                finally
+                {
+
+                    RemoveCurrentTask();
+
+                    NextTask();
+
+                }
+
+            });
+
+            SetupTask(t);
+
+            myRetainedTaskList.Add(t);
+
+        }
+
+        //FailFast if Exception is thrown
+
+        protected void ActorEnqueueDelegateFailFastNoTaskListCheck(Action action)
+        {
+
+            Task t = new Task(() => {
+
+                ResetOnIdleEvent();
+
+                SetManagedThreadId();
+
+                try
+                {
+
+                    action();
+
+                }
+                finally
+                {
+
+                    RemoveCurrentTask();
+
+                    NextTask();
+
+                }
+
+            });
+
+            SetupTask(t);
+
+            myRetainedTaskList.Add(t, (task) => {
+
+                if (task.Exception != null)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Actor Exception", task.Exception);
+
+                }
+
+            }, ContinuationContext.Immediate);
+
+        }
+
+        //Call continuation action if Exception is thrown
+
+        protected void ActorEnqueueDelegateNoTaskListCheck(Action action, Action<Task> continuationAction, ContinuationContext continuationContext = ContinuationContext.Immediate)
+        {
+
+            Task t = new Task(() => {
+
+                ResetOnIdleEvent();
+
+                SetManagedThreadId();
+
+                try
+                {
+
+                    action();
+
+                }
+                finally
+                {
+
+                    RemoveCurrentTask();
+
+                    NextTask();
+
+                }
+
+            });
+
+            SetupTask(t);
+
+            myRetainedTaskList.Add(t, continuationAction, continuationContext);
+
+        }
+
+        //Funcs
+
+        protected ActorTask<TResult> ActorEnqueueDelegateNoTaskListCheck<TResult>(Func<TResult> func)
+        {
+
+            Task<TResult> t = new Task<TResult>(() => {
+
+                ResetOnIdleEvent();
+
+                SetManagedThreadId();
+
+                try
+                {
+
+                    return func();
+
+                }
+                finally
+                {
+
+                    RemoveCurrentTask();
+
+                    //Now seen as not executing
+
+                    //CheckIsDone();
+
+                    NextTask();
+
+                    //Now possibly seen as executing again
+
+                    //InvaldateManagedThreadId();
+
+                }
+
+            });
+
+            ActorTask<TResult> at = new ActorTask<TResult>(t);
+
+            SetupTask(t);
+
+            return at;
+
+        }
+
+        //A way to manualy check the reatined task list
+
+        protected void ActorCheckRetainedTasks()
+        {
+
+            myRetainedTaskList.Check();
+
+        }
+
         public virtual void Dispose()
         {
 
@@ -1042,9 +1251,7 @@ namespace ActSharp
         }
 
         //Task Executors
-
-
-
+        
     }
 
 }

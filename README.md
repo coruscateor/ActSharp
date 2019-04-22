@@ -104,6 +104,11 @@ As indicated by the example ActSharp.Async is an extension method namespace for 
 
 ### Changelog:
 
+Version 0.1.2:
+
+* Added ActorEnqueueDelegateNoTaskList methods which set up actor tasks that don't check the retained task list when executed
+* Added an ActorCheckRetainedTasks method to check retained tasks independently from the ActorEnqueueDelegate task setup
+
 Version 0.1.1:
 
 * Added void returning overrides for methods that return Task and ActorTask

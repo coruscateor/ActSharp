@@ -35,21 +35,21 @@ namespace ActSharp.System.Collections.Generic
         public ActorTask<int> Capacity()
         {
 
-            return ActorEnqueueDelegate(() => { return myList.Capacity; });
+            return ActorEnqueueDelegateNoTaskListCheck(() => { return myList.Capacity; });
 
         }
 
         public ActorTask Capacity(int value)
         {
 
-            return ActorEnqueueDelegate(() => { myList.Capacity = value; });
+            return ActorEnqueueDelegateNoTaskListCheck(() => { myList.Capacity = value; });
 
         }
 
         public ActorTask<int> Count()
         {
 
-            return ActorEnqueueDelegate(() => { return myList.Count; });
+            return ActorEnqueueDelegateNoTaskListCheck(() => { return myList.Count; });
 
         }
 
@@ -59,7 +59,7 @@ namespace ActSharp.System.Collections.Generic
             get
             {
 
-                return ActorEnqueueDelegate(() => { return myList[index]; });
+                return ActorEnqueueDelegateNoTaskListCheck(() => { return myList[index]; });
 
             }
 
@@ -68,14 +68,14 @@ namespace ActSharp.System.Collections.Generic
         public ActorTask<T> Get(int index)
         {
 
-            return ActorEnqueueDelegate(() => { return myList[index]; });
+            return ActorEnqueueDelegateNoTaskListCheck(() => { return myList[index]; });
 
         }
 
         public ActorTask Set(int index, T value)
         {
 
-            return ActorEnqueueDelegate(() => { myList[index] = value; });
+            return ActorEnqueueDelegateNoTaskListCheck(() => { myList[index] = value; });
 
         }
 
@@ -84,7 +84,7 @@ namespace ActSharp.System.Collections.Generic
         public ActorTask<(T, bool)> TryGet(int index)
         {
 
-            return ActorEnqueueDelegate(() => {
+            return ActorEnqueueDelegateNoTaskListCheck(() => {
 
                 var result = (Result: default(T), Found: false);
 
@@ -106,7 +106,7 @@ namespace ActSharp.System.Collections.Generic
         public ActorTask<bool> TrySet(int index, T value)
         {
 
-            return ActorEnqueueDelegate(() => {
+            return ActorEnqueueDelegateNoTaskListCheck(() => {
 
                 if (index > -1 && index < myList.Count)
                 {
@@ -128,105 +128,105 @@ namespace ActSharp.System.Collections.Generic
         public ActorTask Add(T item)
         {
 
-            return ActorEnqueueDelegate(() => { myList.Add(item); });
+            return ActorEnqueueDelegateNoTaskListCheck(() => { myList.Add(item); });
 
         }
 
         public ActorTask AddRange(IEnumerable<T> collection)
         {
 
-            return ActorEnqueueDelegate(() => { myList.AddRange(collection); });
+            return ActorEnqueueDelegateNoTaskListCheck(() => { myList.AddRange(collection); });
 
         }
 
         public ActorTask<List<T>> CloneList()
         {
 
-            return ActorEnqueueDelegate(() => new List<T>(myList));
+            return ActorEnqueueDelegateNoTaskListCheck(() => new List<T>(myList));
 
         }
 
         public ActorTask<int> BinarySearch(int index, int count, T item, IComparer<T> comparer)
         {
 
-            return ActorEnqueueDelegate(() => myList.BinarySearch(index, count, item, comparer));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.BinarySearch(index, count, item, comparer));
 
         }
 
         public ActorTask<int> BinarySearch(T item)
         {
 
-            return ActorEnqueueDelegate(() => myList.BinarySearch(item));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.BinarySearch(item));
 
         }
 
         public ActorTask<int> BinarySearch(T item, IComparer<T> comparer)
         {
 
-            return ActorEnqueueDelegate(() => myList.BinarySearch(item, comparer));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.BinarySearch(item, comparer));
 
         }
 
         public ActorTask Clear()
         {
 
-            return ActorEnqueueDelegate(myList.Clear);
+            return ActorEnqueueDelegateNoTaskListCheck(myList.Clear);
 
         }
 
         public ActorTask<bool> Contains(T item)
         {
 
-            return ActorEnqueueDelegate(() => myList.Contains(item));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.Contains(item));
 
         }
 
         public ActorTask<List<TOutput>> ConvertAll<TOutput>(Converter<T, TOutput> converter)
         {
 
-            return ActorEnqueueDelegate(() => myList.ConvertAll(converter));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.ConvertAll(converter));
 
         }
 
         public ActorTask CopyTo(int index, T[] array, int arrayIndex, int count)
         {
 
-            return ActorEnqueueDelegate(() => myList.CopyTo(index, array, arrayIndex, count));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.CopyTo(index, array, arrayIndex, count));
 
         }
 
         public ActorTask CopyTo(T[] array)
         {
 
-            return ActorEnqueueDelegate(() => myList.CopyTo(array));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.CopyTo(array));
 
         }
 
         public ActorTask CopyTo(T[] array, int arrayIndex)
         {
 
-            return ActorEnqueueDelegate(() => myList.CopyTo(array, arrayIndex));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.CopyTo(array, arrayIndex));
 
         }
 
         public ActorTask<bool> Exists(Predicate<T> match)
         {
 
-            return ActorEnqueueDelegate(() => myList.Exists(match));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.Exists(match));
 
         }
 
         public ActorTask<T> Find(Predicate<T> match)
         {
 
-            return ActorEnqueueDelegate(() => myList.Find(match));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.Find(match));
 
         }
 
         public ActorTask<List<T>> FindAll(Predicate<T> match)
         {
 
-            return ActorEnqueueDelegate(() => myList.FindAll(match));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.FindAll(match));
 
         }
 
@@ -235,140 +235,140 @@ namespace ActSharp.System.Collections.Generic
         public ActorTask ForEach(Action<T> action)
         {
 
-            return ActorEnqueueDelegate(() => myList.ForEach(action));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.ForEach(action));
 
         }
 
         public ActorTask<List<T>> GetRange(int index, int count)
         {
 
-            return ActorEnqueueDelegate(() => myList.GetRange(index, count));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.GetRange(index, count));
 
         }
 
         public ActorTask<int> IndexOf(T item)
         {
 
-            return ActorEnqueueDelegate(() => myList.IndexOf(item));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.IndexOf(item));
 
         }
 
         public ActorTask<int> IndexOf(T item, int index)
         {
 
-            return ActorEnqueueDelegate(() => myList.IndexOf(item, index));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.IndexOf(item, index));
 
         }
 
         public ActorTask<int> IndexOf(T item, int index, int count)
         {
 
-            return ActorEnqueueDelegate(() => myList.IndexOf(item, index, count));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.IndexOf(item, index, count));
 
         }
 
         public ActorTask Insert(int index, T item)
         {
 
-            return ActorEnqueueDelegate(() => myList.Insert(index, item));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.Insert(index, item));
 
         }
 
         public ActorTask InsertRange(int index, IEnumerable<T> collection)
         {
 
-            return ActorEnqueueDelegate(() => myList.InsertRange(index, collection));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.InsertRange(index, collection));
 
         }
 
         public ActorTask<bool> Remove(T item)
         {
 
-            return ActorEnqueueDelegate(() => myList.Remove(item));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.Remove(item));
 
         }
 
         public ActorTask<int> RemoveAll(Predicate<T> match)
         {
 
-            return ActorEnqueueDelegate(() => myList.RemoveAll(match));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.RemoveAll(match));
 
         }
 
         public ActorTask RemoveAt(int index)
         {
 
-            return ActorEnqueueDelegate(() => myList.RemoveAt(index));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.RemoveAt(index));
 
         }
 
         public ActorTask RemoveRange(int index, int count)
         {
 
-            return ActorEnqueueDelegate(() => myList.RemoveRange(index, count));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.RemoveRange(index, count));
 
         }
 
         public ActorTask Reverse()
         {
 
-            return ActorEnqueueDelegate(myList.Reverse);
+            return ActorEnqueueDelegateNoTaskListCheck(myList.Reverse);
 
         }
 
         public ActorTask Reverse(int index, int count)
         {
 
-            return ActorEnqueueDelegate(() => myList.Reverse(index, count));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.Reverse(index, count));
 
         }
 
         public ActorTask Sort()
         {
 
-            return ActorEnqueueDelegate(myList.Sort);
+            return ActorEnqueueDelegateNoTaskListCheck(myList.Sort);
 
         }
 
         public ActorTask Sort(Comparison<T> comparison)
         {
 
-            return ActorEnqueueDelegate(() => myList.Sort(comparison));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.Sort(comparison));
 
         }
 
         public ActorTask Sort(IComparer<T> comparer)
         {
 
-            return ActorEnqueueDelegate(() => myList.Sort(comparer));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.Sort(comparer));
 
         }
 
         public ActorTask Sort(int index, int count, IComparer<T> comparer)
         {
 
-            return ActorEnqueueDelegate(() => myList.Sort(index, count, comparer));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.Sort(index, count, comparer));
 
         }
 
         public ActorTask<T[]> ToArray()
         {
 
-            return ActorEnqueueDelegate(() => myList.ToArray());
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.ToArray());
 
         }
 
         public ActorTask TrimExcess()
         {
 
-            return ActorEnqueueDelegate(myList.TrimExcess);
+            return ActorEnqueueDelegateNoTaskListCheck(myList.TrimExcess);
 
         }
 
         public ActorTask<bool> TrueForAll(Predicate<T> match)
         {
 
-            return ActorEnqueueDelegate(() => myList.TrueForAll(match));
+            return ActorEnqueueDelegateNoTaskListCheck(() => myList.TrueForAll(match));
 
         }
 
