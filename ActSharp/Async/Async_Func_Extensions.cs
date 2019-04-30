@@ -30,7 +30,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T, TResult>(Func<T, TResult> func, T p, TaskCreationOptions creationOptions)
+        public static Task<TResult> Async<T, TResult>(this Func<T, TResult> func, T p, TaskCreationOptions creationOptions)
         {
 
             Func<TResult> fun = () => { return func(p); };
@@ -39,7 +39,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T, TResult>(Func<T, TResult> func, T p, CancellationToken cancellationToken)
+        public static Task<TResult> Async<T, TResult>(this Func<T, TResult> func, T p, CancellationToken cancellationToken)
         {
 
             Func<TResult> fun = () => { return func(p); };
@@ -48,7 +48,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T, TResult>(Func<T, TResult> func, T p, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
+        public static Task<TResult> Async<T, TResult>(this Func<T, TResult> func, T p, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
         {
 
             Func<TResult> fun = () => { return func(p); };
@@ -59,7 +59,7 @@ namespace ActSharp.Async
 
         //2 Parameters
 
-        public static Task<TResult> Async<T1, T2, TResult>(Func<T1, T2, TResult> func, T1 p1, T2 p2)
+        public static Task<TResult> Async<T1, T2, TResult>(this Func<T1, T2, TResult> func, T1 p1, T2 p2)
         {
 
             Func<TResult> fun = () => { return func(p1, p2); };
@@ -68,7 +68,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T1, T2, TResult>(Func<T1, T2, TResult> func, T1 p1, T2 p2, TaskCreationOptions creationOptions)
+        public static Task<TResult> Async<T1, T2, TResult>(this Func<T1, T2, TResult> func, T1 p1, T2 p2, TaskCreationOptions creationOptions)
         {
 
             Func<TResult> fun = () => { return func(p1, p2); };
@@ -77,7 +77,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T1, T2, TResult>(Func<T1, T2, TResult> func, T1 p1, T2 p2, CancellationToken cancellationToken)
+        public static Task<TResult> Async<T1, T2, TResult>(this Func<T1, T2, TResult> func, T1 p1, T2 p2, CancellationToken cancellationToken)
         {
 
             Func<TResult> fun = () => { return func(p1, p2); };
@@ -86,7 +86,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T1, T2, TResult>(Func<T1, T2, TResult> func, T1 p1, T2 p2, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
+        public static Task<TResult> Async<T1, T2, TResult>(this Func<T1, T2, TResult> func, T1 p1, T2 p2, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
         {
 
             Func<TResult> fun = () => { return func(p1, p2); };
@@ -97,7 +97,7 @@ namespace ActSharp.Async
 
         //3 Parameters
 
-        public static Task<TResult> Async<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3)
+        public static Task<TResult> Async<T1, T2, T3, TResult>(this Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3)
         {
 
             Func<TResult> fun = () => { return func(p1, p2, p3); };
@@ -106,7 +106,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3, TaskCreationOptions creationOptions)
+        public static Task<TResult> Async<T1, T2, T3, TResult>(this Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3, TaskCreationOptions creationOptions)
         {
 
             Func<TResult> fun = () => { return func(p1, p2, p3); };
@@ -115,7 +115,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3, CancellationToken cancellationToken)
+        public static Task<TResult> Async<T1, T2, T3, TResult>(this Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3, CancellationToken cancellationToken)
         {
 
             Func<TResult> fun = () => { return func(p1, p2, p3); };
@@ -124,7 +124,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
+        public static Task<TResult> Async<T1, T2, T3, TResult>(this Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
         {
 
             Func<TResult> fun = () => { return func(p1, p2, p3); };
@@ -135,7 +135,7 @@ namespace ActSharp.Async
 
         //4 Parameters
 
-        public static Task<TResult> Async<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4)
+        public static Task<TResult> Async<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4)
         {
 
             Func<TResult> fun = () => { return func(p1, p2, p3, p4); };
@@ -144,7 +144,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, TaskCreationOptions creationOptions)
+        public static Task<TResult> Async<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, TaskCreationOptions creationOptions)
         {
 
             Func<TResult> fun = () => { return func(p1, p2, p3, p4); };
@@ -153,7 +153,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, CancellationToken cancellationToken)
+        public static Task<TResult> Async<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, CancellationToken cancellationToken)
         {
 
             Func<TResult> fun = () => { return func(p1, p2, p3, p4); };
@@ -162,7 +162,7 @@ namespace ActSharp.Async
 
         }
 
-        public static Task<TResult> Async<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
+        public static Task<TResult> Async<T1, T2, T3, T4, TResult>(this Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
         {
 
             Func<TResult> fun = () => { return func(p1, p2, p3, p4); };

@@ -104,6 +104,11 @@ As indicated by the example ActSharp.Async is an extension method namespace for 
 
 ### Changelog:
 
+Version 0.1.3:
+
+* Added Async Events
+* Added more IEnumerable delegate extension methods
+
 Version 0.1.2:
 
 * Added ActorEnqueueDelegateNoTaskList methods which set up actor tasks that don't check the retained task list when executed
@@ -116,22 +121,9 @@ Version 0.1.1:
 
 
 
-#### Likely Todos:
-
-* Add more void returning overrides
-
-#### Un-likely Todos:
-
-* Add ref and out parameter permutations to the ActSharp.Async delegate extensions
-* Add ref and out parameter permutations to the ActorEnqueueDelegate method overloads in the Actor class
-
-
-
 #### ActSharp.System:
 
 A library for wrapping appropriate standard library objects in actors.
-
-More will likely be added.
 
 
 

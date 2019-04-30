@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ActSharp.Async
 {
 
-    public static class IEnumerable_Extensions
+    public static class IEnumerable_Task_Extensions
     {
 
         //Tasks -- WaitAll
