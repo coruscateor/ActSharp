@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using ActSharp;
 
 namespace ActSharpDemo
@@ -18,19 +19,19 @@ namespace ActSharpDemo
 
         }
 
-        public ActorTask<string> HelloWorld()
+        public Task<string> HelloWorld()
         {
 
             WriteThreadId();
 
-            return ActorEnqueueDelegate(() => myId.ToString() + " - Hello World!");
+            return ActorEnqueue(() => myId.ToString() + " - Hello World!");
 
         }
 
-        public ActorTask<int> Add()
+        public Task<int> Add()
         {
 
-            return ActorEnqueueDelegate(() => {
+            return ActorEnqueue(() => {
 
                 Random rnd = new Random();
 

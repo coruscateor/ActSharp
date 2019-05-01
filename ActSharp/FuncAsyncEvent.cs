@@ -19,7 +19,7 @@ namespace ActSharp
         public void Subscribe(Func<TSender, TEventArgs, TResult> item)
         {
 
-            ActorEnqueueDelegateFailFastNoTaskListCheck(() => {
+            ActorEnqueueFailFastNoTaskListCheck(() => {
 
                 if (!myFuncList.Contains(item))
                     myFuncList.Add(item);
@@ -31,7 +31,7 @@ namespace ActSharp
         public void UnSubscribe(Func<TSender, TEventArgs, TResult> item)
         {
 
-            ActorEnqueueDelegateFailFastNoTaskListCheck(() => {
+            ActorEnqueueFailFastNoTaskListCheck(() => {
 
                 myFuncList.Remove(item);
 
@@ -39,10 +39,10 @@ namespace ActSharp
 
         }
 
-        public ActorTask<List<Task<TResult>>> Call(TSender sender, TEventArgs eventArgs)
+        public Task<List<Task<TResult>>> Call(TSender sender, TEventArgs eventArgs)
         {
 
-            return ActorEnqueueDelegateNoTaskListCheck(() => {
+            return ActorEnqueueNoTaskListCheck(() => {
 
                 List<Task<TResult>> results = new List<Task<TResult>>();
 
@@ -57,10 +57,10 @@ namespace ActSharp
 
         }
 
-        public ActorTask Call(TSender sender, TEventArgs eventArgs, List<Task<TResult>> results)
+        public Task Call(TSender sender, TEventArgs eventArgs, List<Task<TResult>> results)
         {
 
-            return ActorEnqueueDelegateNoTaskListCheck(() => {
+            return ActorEnqueueNoTaskListCheck(() => {
 
                 results.Capacity = myFuncList.Capacity;
 
@@ -75,10 +75,10 @@ namespace ActSharp
 
         }
 
-        public ActorTask<int> Count()
+        public Task<int> Count()
         {
 
-            return ActorEnqueueDelegateNoTaskListCheck(() => {
+            return ActorEnqueueNoTaskListCheck(() => {
 
                 return myFuncList.Count;
 

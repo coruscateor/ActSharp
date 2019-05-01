@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using ActSharp.Async;
 
 namespace ActSharp
@@ -18,7 +19,7 @@ namespace ActSharp
         public void Subscribe(Action<TSender, TEventArgs> item)
         {
 
-            ActorEnqueueDelegateFailFastNoTaskListCheck(() => {
+            ActorEnqueueFailFastNoTaskListCheck(() => {
 
                 if(!myActionList.Contains(item))
                     myActionList.Add(item);
@@ -30,7 +31,7 @@ namespace ActSharp
         public void UnSubscribe(Action<TSender, TEventArgs> item)
         {
 
-            ActorEnqueueDelegateFailFastNoTaskListCheck(() => {
+            ActorEnqueueFailFastNoTaskListCheck(() => {
 
                 myActionList.Remove(item);
 
@@ -41,7 +42,7 @@ namespace ActSharp
         public void Call(TSender sender, TEventArgs eventArgs)
         {
 
-            ActorEnqueueDelegateFailFastNoTaskListCheck(() => {
+            ActorEnqueueFailFastNoTaskListCheck(() => {
 
                 //Call each action delegate on a separate thread
 
@@ -52,10 +53,10 @@ namespace ActSharp
 
         }
 
-        public ActorTask<int> Count()
+        public Task<int> Count()
         {
 
-            return ActorEnqueueDelegateNoTaskListCheck(() => {
+            return ActorEnqueueNoTaskListCheck(() => {
 
                 return myActionList.Count;
 

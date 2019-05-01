@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using ActSharp;
 
 namespace ActSharp.System
@@ -23,38 +24,38 @@ namespace ActSharp.System
 
         }
 
-        public ActorTask<int> Next()
+        public Task<int> Next()
         {
 
-            return ActorEnqueueDelegate(myRandom.Next);
+            return ActorEnqueueNoTaskListCheck(myRandom.Next);
 
         }
 
-        public ActorTask<int> Next(int maxValue)
+        public Task<int> Next(int maxValue)
         {
 
-            return ActorEnqueueDelegate(myRandom.Next, maxValue);
+            return ActorEnqueueNoTaskListCheck(() => myRandom.Next(maxValue));
 
         }
 
-        public ActorTask<int> Next(int minValue, int maxValue)
+        public Task<int> Next(int minValue, int maxValue)
         {
 
-            return ActorEnqueueDelegate(myRandom.Next, minValue, maxValue);
+            return ActorEnqueueNoTaskListCheck(() => myRandom.Next(minValue, maxValue));
 
         }
 
-        public ActorTask NextBytes(byte[] buffer)
+        public Task NextBytes(byte[] buffer)
         {
 
-            return ActorEnqueueDelegate(myRandom.NextBytes, buffer);
+            return ActorEnqueueNoTaskListCheck(() => myRandom.NextBytes(buffer));
 
         }
 
-        public ActorTask<double> NextDouble()
+        public Task<double> NextDouble()
         {
 
-            return ActorEnqueueDelegate(myRandom.NextDouble);
+            return ActorEnqueueNoTaskListCheck(myRandom.NextDouble);
 
         }
 

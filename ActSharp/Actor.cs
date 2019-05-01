@@ -15,7 +15,7 @@ namespace ActSharp
     /// 
     /// The idea behind actors in this framework is that all methods that would otherwise be public in decendant actor types are hidden and exposed though proxy methods which basically execute the hidden methods on the thread pool in serial as called on individual actor instances. 
     /// </summary>
-    public abstract class Actor : IActor, IDisposable
+    public abstract class Actor : IDisposable
     {
 
         ConcurrentQueue<Task> myExQueue = new ConcurrentQueue<Task>();
@@ -610,26 +610,26 @@ namespace ActSharp
 
         }
 
-        protected void ActorRetain<T>(Task<T> task, Action<Task<T>> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+        protected void ActorRetain<T>(Task<T> task, Action<Task> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
             myRetainedTaskList.Add(task, action, continuationContext, prerequisites);
 
         }
 
-        protected void ActorRetain(ActorTask task, Action<ActorTask> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
-        {
+        //protected void ActorRetain(Task task, Action<Task> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+        //{
 
-            myRetainedTaskList.Add(task, action, continuationContext, prerequisites);
+        //    myRetainedTaskList.Add(task, action, continuationContext, prerequisites);
 
-        }
+        //}
 
-        protected void ActorRetain<T>(ActorTask<T> task, Action<ActorTask<T>> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
-        {
+        //protected void ActorRetain<T>(Task<T> task, Action<Task<T>> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+        //{
 
-            myRetainedTaskList.Add(task, action, continuationContext, prerequisites);
+        //    myRetainedTaskList.Add(task, action, continuationContext, prerequisites);
 
-        }
+        //}
 
         //protected void ActorRetain(Task task, Action<Task> onCompleted = null, Action<Task> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
         //{
@@ -645,25 +645,25 @@ namespace ActSharp
 
         //}
 
-        //protected void ActorRetain(ActorTask actorTask, Action<ActorTask> onCompleted = null, Action<ActorTask> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
+        //protected void ActorRetain(Task actorTask, Action<Task> onCompleted = null, Action<Task> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
         //{
 
         //    myRetainedTaskList.Add(actorTask, onCompleted, onError, continueOnCurrentThread, prerequisites);
 
         //}
 
-        //protected void ActorRetain<T>(ActorTask<T> actorTask, Action<ActorTask<T>> onCompleted = null, Action<ActorTask<T>> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
+        //protected void ActorRetain<T>(Task<T> actorTask, Action<Task<T>> onCompleted = null, Action<Task<T>> onError = null, bool continueOnCurrentThread = false, IEnumerable<IAsyncResult> prerequisites = null)
         //{
 
         //    myRetainedTaskList.Add(actorTask, onCompleted, onError, continueOnCurrentThread, prerequisites);
 
         //}
 
-        //private void SetupTask<TActorTask>(Task task)
-        //    where TActorTask : class, new(Task, IActor)
+        //private void SetupTask<TTask>(Task task)
+        //    where TTask : class, new(Task, IActor)
         //{
 
-        //    TActorTask at = new TActorTask(task, this);
+        //    TTask at = new TTask(task, this);
 
         //    myExQueue.Enqueue(task);
 
@@ -686,10 +686,10 @@ namespace ActSharp
 
         }
 
-        //private TActorTask SetupActorTask<TActorTask>(Task task)
+        //private TTask SetupTask<TTask>(Task task)
         //{
 
-        //    TActorTask at = new TActorTask(t, this);
+        //    TTask at = new TTask(t, this);
 
         //    SetupTask(task);
 
@@ -707,7 +707,7 @@ namespace ActSharp
 
         //Actions
 
-        protected ActorTask ActorEnqueueDelegate(Action action)
+        protected Task ActorEnqueue(Action action)
         {
 
             Task t = new Task(() => {
@@ -741,67 +741,65 @@ namespace ActSharp
 
             });
 
-            ActorTask at = new ActorTask(t); //, this);
-
             SetupTask(t);
 
-            return at;
+            return t;
 
         }
 
-        protected ActorTask ActorEnqueueDelegate<T>(Action<T> action, T p)
+        protected Task ActorEnqueue<T>(Action<T> action, T p)
         {
 
-            return ActorEnqueueDelegate(() => { action(p); });
+            return ActorEnqueue(() => { action(p); });
 
         }
 
-        protected ActorTask ActorEnqueueDelegate<T1, T2>(Action<T1, T2> action, T1 p1, T2 p2)
+        protected Task ActorEnqueue<T1, T2>(Action<T1, T2> action, T1 p1, T2 p2)
         {
 
-            return ActorEnqueueDelegate(() => { action(p1, p2); });
+            return ActorEnqueue(() => { action(p1, p2); });
 
         }
 
-        protected ActorTask ActorEnqueueDelegate<T1, T2, T3>(Action<T1, T2, T3> action, T1 p1, T2 p2, T3 p3)
+        protected Task ActorEnqueue<T1, T2, T3>(Action<T1, T2, T3> action, T1 p1, T2 p2, T3 p3)
         {
 
-            return ActorEnqueueDelegate(() => { action(p1, p2, p3); });
+            return ActorEnqueue(() => { action(p1, p2, p3); });
 
         }
 
-        protected ActorTask ActorEnqueueDelegate<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action, T1 p1, T2 p2, T3 p3, T4 p4)
+        protected Task ActorEnqueue<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action, T1 p1, T2 p2, T3 p3, T4 p4)
         {
 
-            return ActorEnqueueDelegate(() => { action(p1, p2, p3, p4); });
+            return ActorEnqueue(() => { action(p1, p2, p3, p4); });
 
         }
 
-        protected ActorTask ActorEnqueueDelegate<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> action, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5)
+        protected Task ActorEnqueue<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> action, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5)
         {
 
-            return ActorEnqueueDelegate(() => { action(p1, p2, p3, p4, p5); });
+            return ActorEnqueue(() => { action(p1, p2, p3, p4, p5); });
 
         }
 
-        protected ActorTask ActorEnqueueDelegate<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> action, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6)
+        protected Task ActorEnqueue<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> action, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6)
         {
 
-            return ActorEnqueueDelegate(() => { action(p1, p2, p3, p4, p5, p6); });
+            return ActorEnqueue(() => { action(p1, p2, p3, p4, p5, p6); });
 
         }
 
-        protected ActorTask ActorEnqueueDelegate<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> action, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6, T7 p7)
+        protected Task ActorEnqueue<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> action, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6, T7 p7)
         {
 
-            return ActorEnqueueDelegate(() => { action(p1, p2, p3, p4, p5, p6, p7); });
+            return ActorEnqueue(() => { action(p1, p2, p3, p4, p5, p6, p7); });
 
         }
 
-        protected ActorTask ActorEnqueueDelegate<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> action, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6, T7 p7, T8 p8)
+        protected Task ActorEnqueue<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> action, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6, T7 p7, T8 p8)
         {
 
-            return ActorEnqueueDelegate(() => { action(p1, p2, p3, p4, p5, p6, p7, p8); });
+            return ActorEnqueue(() => { action(p1, p2, p3, p4, p5, p6, p7, p8); });
 
         }
 
@@ -809,7 +807,7 @@ namespace ActSharp
 
         //Ignoring the Exception
 
-        protected void ActorEnqueueDelegateIgnore(Action action)
+        protected void ActorEnqueueIgnore(Action action)
         {
 
             Task t = new Task(() => {
@@ -847,7 +845,7 @@ namespace ActSharp
 
         //FailFast if Exception is thrown
 
-        protected void ActorEnqueueDelegateFailFast(Action action)
+        protected void ActorEnqueueFailFast(Action action)
         {
 
             Task t = new Task(() => {
@@ -894,7 +892,7 @@ namespace ActSharp
 
         //Call continuation action if Exception is thrown
 
-        protected void ActorEnqueueDelegate(Action action, Action<Task> continuationAction, ContinuationContext continuationContext = ContinuationContext.Immediate)
+        protected void ActorEnqueue(Action action, Action<Task> continuationAction, ContinuationContext continuationContext = ContinuationContext.Immediate)
         {
 
             Task t = new Task(() => {
@@ -932,7 +930,7 @@ namespace ActSharp
 
         //Funcs
 
-        protected ActorTask<TResult> ActorEnqueueDelegate<TResult>(Func<TResult> func)
+        protected Task<TResult> ActorEnqueue<TResult>(Func<TResult> func)
         {
 
             Task<TResult> t = new Task<TResult>(() => {
@@ -968,73 +966,71 @@ namespace ActSharp
 
             });
 
-            ActorTask<TResult> at = new ActorTask<TResult>(t);
-
             SetupTask(t);
 
-            return at;
+            return t;
 
         }
 
-        protected ActorTask<TResult> ActorEnqueueDelegate<TResult, T>(Func<T, TResult> func, T p)
+        protected Task<TResult> ActorEnqueue<TResult, T>(Func<T, TResult> func, T p)
         {
 
-            return ActorEnqueueDelegate(() => { return func(p); });
+            return ActorEnqueue(() => { return func(p); });
 
         }
 
-        protected ActorTask<TResult> ActorEnqueueDelegate<TResult, T1, T2>(Func<T1, T2, TResult> func, T1 p1, T2 p2)
+        protected Task<TResult> ActorEnqueue<TResult, T1, T2>(Func<T1, T2, TResult> func, T1 p1, T2 p2)
         {
 
-            return ActorEnqueueDelegate(() => { return func(p1, p2); });
+            return ActorEnqueue(() => { return func(p1, p2); });
 
         }
 
-        protected ActorTask<TResult> ActorEnqueueDelegate<TResult, T1, T2, T3>(Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3)
+        protected Task<TResult> ActorEnqueue<TResult, T1, T2, T3>(Func<T1, T2, T3, TResult> func, T1 p1, T2 p2, T3 p3)
         {
 
-            return ActorEnqueueDelegate(() => { return func(p1, p2, p3); });
+            return ActorEnqueue(() => { return func(p1, p2, p3); });
 
         }
 
-        protected ActorTask<TResult> ActorEnqueueDelegate<TResult, T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4)
+        protected Task<TResult> ActorEnqueue<TResult, T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4)
         {
 
-            return ActorEnqueueDelegate(() => { return func(p1, p2, p3, p4); });
+            return ActorEnqueue(() => { return func(p1, p2, p3, p4); });
 
         }
 
-        protected ActorTask<TResult> ActorEnqueueDelegate<TResult, T1, T2, T3, T4, T5>(Func<T1, T2, T3, T4, T5, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5)
+        protected Task<TResult> ActorEnqueue<TResult, T1, T2, T3, T4, T5>(Func<T1, T2, T3, T4, T5, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5)
         {
 
-            return ActorEnqueueDelegate(() => { return func(p1, p2, p3, p4, p5); });
+            return ActorEnqueue(() => { return func(p1, p2, p3, p4, p5); });
 
         }
 
-        protected ActorTask<TResult> ActorEnqueueDelegate<TResult, T1, T2, T3, T4, T5, T6>(Func<T1, T2, T3, T4, T5, T6, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6)
+        protected Task<TResult> ActorEnqueue<TResult, T1, T2, T3, T4, T5, T6>(Func<T1, T2, T3, T4, T5, T6, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6)
         {
 
-            return ActorEnqueueDelegate(() => { return func(p1, p2, p3, p4, p5, p6); });
+            return ActorEnqueue(() => { return func(p1, p2, p3, p4, p5, p6); });
 
         }
 
-        protected ActorTask<TResult> ActorEnqueueDelegate<TResult, T1, T2, T3, T4, T5, T6, T7>(Func<T1, T2, T3, T4, T5, T6, T7, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6, T7 p7)
+        protected Task<TResult> ActorEnqueue<TResult, T1, T2, T3, T4, T5, T6, T7>(Func<T1, T2, T3, T4, T5, T6, T7, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6, T7 p7)
         {
 
-            return ActorEnqueueDelegate(() => { return func(p1, p2, p3, p4, p5, p6, p7); });
+            return ActorEnqueue(() => { return func(p1, p2, p3, p4, p5, p6, p7); });
 
         }
 
-        protected ActorTask<TResult> ActorEnqueueDelegate<TResult, T1, T2, T3, T4, T5, T6, T7, T8>(Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6, T7 p7, T8 p8)
+        protected Task<TResult> ActorEnqueue<TResult, T1, T2, T3, T4, T5, T6, T7, T8>(Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> func, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6, T7 p7, T8 p8)
         {
 
-            return ActorEnqueueDelegate(() => { return func(p1, p2, p3, p4, p5, p6, p7, p8); });
+            return ActorEnqueue(() => { return func(p1, p2, p3, p4, p5, p6, p7, p8); });
 
         }
 
-        //ActorEnqueueDelegate with no RetainedTaskList check
+        //ActorEnqueue with no RetainedTaskList check
 
-        protected ActorTask ActorEnqueueDelegateNoTaskListCheck(Action action)
+        protected Task ActorEnqueueNoTaskListCheck(Action action)
         {
 
             Task t = new Task(() => {
@@ -1064,11 +1060,9 @@ namespace ActSharp
 
             });
 
-            ActorTask at = new ActorTask(t); //, this);
-
             SetupTask(t);
 
-            return at;
+            return t;
 
         }
 
@@ -1076,7 +1070,7 @@ namespace ActSharp
 
         //Ignoring the Exception
 
-        protected void ActorEnqueueDelegateIgnoreNoTaskListCheck(Action action)
+        protected void ActorEnqueueIgnoreNoTaskListCheck(Action action)
         {
 
             Task t = new Task(() => {
@@ -1110,7 +1104,7 @@ namespace ActSharp
 
         //FailFast if Exception is thrown
 
-        protected void ActorEnqueueDelegateFailFastNoTaskListCheck(Action action)
+        protected void ActorEnqueueFailFastNoTaskListCheck(Action action)
         {
 
             Task t = new Task(() => {
@@ -1153,7 +1147,7 @@ namespace ActSharp
 
         //Call continuation action if Exception is thrown
 
-        protected void ActorEnqueueDelegateNoTaskListCheck(Action action, Action<Task> continuationAction, ContinuationContext continuationContext = ContinuationContext.Immediate)
+        protected void ActorEnqueueNoTaskListCheck(Action action, Action<Task> continuationAction, ContinuationContext continuationContext = ContinuationContext.Immediate)
         {
 
             Task t = new Task(() => {
@@ -1187,7 +1181,7 @@ namespace ActSharp
 
         //Funcs
 
-        protected ActorTask<TResult> ActorEnqueueDelegateNoTaskListCheck<TResult>(Func<TResult> func)
+        protected Task<TResult> ActorEnqueueNoTaskListCheck<TResult>(Func<TResult> func)
         {
 
             Task<TResult> t = new Task<TResult>(() => {
@@ -1221,11 +1215,11 @@ namespace ActSharp
 
             });
 
-            ActorTask<TResult> at = new ActorTask<TResult>(t);
+            //Task<TResult> at = new Task<TResult>(t);
 
             SetupTask(t);
 
-            return at;
+            return t;
 
         }
 

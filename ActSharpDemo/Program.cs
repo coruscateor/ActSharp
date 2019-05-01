@@ -74,7 +74,7 @@ namespace ActSharpDemo
 
             Console.WriteLine();
 
-            List<ActorTask<int>> results = new List<ActorTask<int>>(100);
+            List<Task<int>> results = new List<Task<int>>(100);
 
             TotalSw.Reset();
 
@@ -136,9 +136,9 @@ namespace ActSharpDemo
 
                 Console.WriteLine("Call: " + i + " - Milliseconds: " + sw.ElapsedMilliseconds + " - Ticks: " + sw.ElapsedTicks);
 
-                Console.WriteLine("Call: " + i + " - ActorTask.IsCompleted: " + at.IsCompleted);
+                Console.WriteLine("Call: " + i + " - Task.IsCompleted: " + at.IsCompleted);
 
-                Console.WriteLine("Call: " + i + " - ActorTask.Result: " + at.Result);
+                Console.WriteLine("Call: " + i + " - Task.Result: " + at.Result);
 
             }; 
 

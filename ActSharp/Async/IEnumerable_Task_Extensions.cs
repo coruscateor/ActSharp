@@ -93,89 +93,6 @@ namespace ActSharp.Async
 
         }
 
-        //IActorTasks
-
-        public static void WaitAll(this IEnumerable<IActorTask> items)
-        {
-
-            foreach (var item in items)
-            {
-
-                item.Wait();
-
-            }
-
-        }
-
-        public static void WaitAll(this IEnumerable<IActorTask> items, int millisecondsTimeout)
-        {
-
-            bool waited = false;
-
-            foreach (var item in items)
-            {
-
-                bool result;
-
-                result = item.Wait(millisecondsTimeout);
-
-                if (!waited)
-                    waited = result;
-
-            }
-
-        }
-
-        public static void WaitAll(this IEnumerable<IActorTask> items, CancellationToken cancellationToken)
-        {
-
-            foreach (var item in items)
-            {
-
-                item.Wait(cancellationToken);
-
-            }
-
-        }
-
-        public static void WaitAll(this IEnumerable<IActorTask> items, TimeSpan timeOut)
-        {
-
-            bool waited = false;
-
-            foreach (var item in items)
-            {
-
-                bool result;
-
-                result = item.Wait(timeOut);
-
-                if (!waited)
-                    waited = result;
-
-            }
-
-        }
-
-        public static void WaitAll(this IEnumerable<IActorTask> items, int millisecondsTimeout, CancellationToken cancellationToken)
-        {
-
-            bool waited = false;
-
-            foreach (var item in items)
-            {
-
-                bool result;
-
-                result = item.Wait(millisecondsTimeout, cancellationToken);
-
-                if (!waited)
-                    waited = result;
-
-            }
-
-        }
-
         //Tasks -- WaitAny
 
         public static void WaitAny(this IEnumerable<Task> items)
@@ -190,22 +107,6 @@ namespace ActSharp.Async
             }
 
         }
-
-        //IActorTasks -- WaitAny
-
-        public static void WaitAny(this IEnumerable<IActorTask> items)
-        {
-
-            foreach (var item in items)
-            {
-                
-                if (!item.IsCompleted && item.Wait(-1))
-                    return;
-
-            }
-
-        }
-
 
     }
 

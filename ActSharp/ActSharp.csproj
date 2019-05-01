@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ActorTask.cs" />
+    <Compile Remove="IActor.cs" />
+    <Compile Remove="IActorTask.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="TaskListObjects\" />
   </ItemGroup>
 

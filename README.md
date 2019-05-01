@@ -1,6 +1,6 @@
 # ActSharp
 
-A light-weight actor and asynchronous method call framework.
+A light-weight actor and asynchronous programming framework for .NET.
 
 #### ActSharp namespace:
 
@@ -18,24 +18,24 @@ namespace ActSharpDemoImplementation
 		{
 		}
 
-		public ActorTask HelloWorld()
+		public Task HelloWorld()
 		{
 
-			ActorEnqueueDelegate(() => Console.WriteLine("Hello World!"));
+			return ActorEnqueue(() => Console.WriteLine("Hello World!"));
 
 		}
 
-		public ActorTask<int> TwoPlusTwo()
+		public Task<int> TwoPlusTwo()
 		{
 
-			return ActorEnqueueDelegate(() => 2 + 2);
+			return ActorEnqueue(() => 2 + 2);
 
 		}
 
-		public ActorTask<int> Add(int a, int b)
+		public Task<int> Add(int a, int b)
 		{
 
-			return ActorEnqueueDelegate(() => {
+			return ActorEnqueue(() => {
 
 				return a + b;
 
@@ -57,7 +57,7 @@ Usage:
 
 		DemoActor demo = new DemoActor();
 
-		var hwActorTask = demo.HelloWorld();
+		var hwTask = demo.HelloWorld();
 
 		var tptTask = demo.TwoPlusTwo();
 
@@ -65,7 +65,7 @@ Usage:
 
 		//demo.HelloWorld() is likely done by now
 
-		Console.WriteLine("hwActorTask is done: " + hwActorTask.IsCompleted);
+		Console.WriteLine("hwTask is done: " + hwTask.IsCompleted);
 
 		Console.WriteLine("tptTask is: " + tptTask.Result);
 
@@ -104,6 +104,10 @@ As indicated by the example ActSharp.Async is an extension method namespace for 
 
 ### Changelog:
 
+Version 0.1.4:
+
+* Simplified the API
+
 Version 0.1.3:
 
 * Added Async Events
@@ -111,12 +115,12 @@ Version 0.1.3:
 
 Version 0.1.2:
 
-* Added ActorEnqueueDelegateNoTaskList methods which set up actor tasks that don't check the retained task list when executed
-* Added an ActorCheckRetainedTasks method to check retained tasks independently from the ActorEnqueueDelegate task setup
+* Added ActorEnqueueNoTaskList methods which set up actor tasks that don't check the retained task list when executed
+* Added an ActorCheckRetainedTasks method to check retained tasks independently from the ActorEnqueue task setup
 
 Version 0.1.1:
 
-* Added void returning overrides for methods that return Task and ActorTask
+* Added void returning overrides for methods that return Task and Task
 * Added ContinuationContext to RetainedTaskList for more fine-grained control over where a continuation takes place
 
 
