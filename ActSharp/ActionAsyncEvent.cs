@@ -53,6 +53,24 @@ namespace ActSharp
 
         }
 
+        public Task Call(TSender sender, TEventArgs eventArgs, List<Task> results)
+        {
+
+            return ActorEnqueueNoTaskListCheck(() => {
+
+                results.Capacity = myActionList.Capacity;
+
+                results.Clear();
+
+                //Call each func delegate on a separate thread
+
+                foreach (var item in myActionList)
+                    results.Add(item.Async(sender, eventArgs));
+
+            });
+
+        }
+
         public Task<int> Count()
         {
 

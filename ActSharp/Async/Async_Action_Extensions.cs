@@ -174,7 +174,7 @@ namespace ActSharp.Async
         public static void AsyncIgnore(this Action action)
         {
 
-            ThreadPool.UnsafeQueueUserWorkItem((obj) =>
+            ThreadPool.QueueUserWorkItem((obj) =>
             {
 
                 try
@@ -194,7 +194,7 @@ namespace ActSharp.Async
         public static void AsyncFailFast(this Action action)
         {
 
-            ThreadPool.UnsafeQueueUserWorkItem((obj) => {
+            ThreadPool.QueueUserWorkItem((obj) => {
 
                 try
                 {
@@ -216,7 +216,7 @@ namespace ActSharp.Async
         public static void Async(this Action action, Action<Exception> exceptionAction)
         {
 
-            ThreadPool.UnsafeQueueUserWorkItem((obj) =>
+            ThreadPool.QueueUserWorkItem((obj) =>
             {
 
                 try

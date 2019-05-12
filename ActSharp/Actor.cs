@@ -18,13 +18,13 @@ namespace ActSharp
     public abstract class Actor : IDisposable
     {
 
-        ConcurrentQueue<Task> myExQueue = new ConcurrentQueue<Task>();
+        ConcurrentQueue<Task> myTaskQueue = new ConcurrentQueue<Task>();
 
         SpinLock myCTLock;
 
         Task myCurrentTask;
 
-        RetainedTaskList myRetainedTaskList;
+        RetainedTaskList myRetainedTaskList = new RetainedTaskList();
 
         ManualResetEventSlim myOnIdleEvent = new ManualResetEventSlim();
 
@@ -34,9 +34,6 @@ namespace ActSharp
 
         public Actor()
         {
-
-            myRetainedTaskList = new RetainedTaskList(myExQueue);
-
         }
 
         public bool ActorIsExecuting
@@ -75,7 +72,7 @@ namespace ActSharp
             get
             {
 
-                return myExQueue.Count;
+                return myTaskQueue.Count;
 
             }
 
@@ -87,7 +84,7 @@ namespace ActSharp
             get
             {
 
-                return myExQueue.IsEmpty;
+                return myTaskQueue.IsEmpty;
 
             }
 
@@ -506,11 +503,11 @@ namespace ActSharp
 
             //myCurrentTask must be null at this point
 
-            myRetainedTaskList.Check();
+            ActorCheckRetainedTasks();
 
             Task nextTask;
 
-            if (myExQueue.TryDequeue(out nextTask))
+            if (myTaskQueue.TryDequeue(out nextTask))
             {
 
                 if (TrySetNextTask(nextTask))
@@ -524,7 +521,7 @@ namespace ActSharp
 
                     //If setting the next task fails put it back on the queue
 
-                    myExQueue.Enqueue(nextTask);
+                    myTaskQueue.Enqueue(nextTask);
 
                 }
 
@@ -536,7 +533,7 @@ namespace ActSharp
 
             //bool clHasTasks = myRetainedTaskList.HasTasks;
 
-            if (nextTask == null && myRetainedTaskList.HasTasks && myExQueue.IsEmpty)
+            if (nextTask == null && myRetainedTaskList.HasTasks && myTaskQueue.IsEmpty)
             {
 
                 nextTask = new Task(CheckRetainedTaskListOnly);
@@ -568,11 +565,11 @@ namespace ActSharp
         void CheckRetainedTaskListOnly()
         {
 
-            myRetainedTaskList.Check();
+            ActorCheckRetainedTasks();
 
             RemoveCurrentTask();
 
-            if (myRetainedTaskList.HasTasks && myExQueue.IsEmpty)
+            if (myRetainedTaskList.HasTasks && myTaskQueue.IsEmpty)
             {
 
                 Task nextCheck = new Task(CheckRetainedTaskListOnly);
@@ -597,7 +594,7 @@ namespace ActSharp
 
             //ContinueWith(task);
 
-            myExQueue.Enqueue(task);
+            myTaskQueue.Enqueue(task);
 
         }
 
@@ -665,7 +662,7 @@ namespace ActSharp
 
         //    TTask at = new TTask(task, this);
 
-        //    myExQueue.Enqueue(task);
+        //    myTaskQueue.Enqueue(task);
 
         //    if (!ActorIsExecuting)
         //        NextTask();
@@ -675,7 +672,7 @@ namespace ActSharp
         private void SetupTask(Task task)
         {
 
-            myExQueue.Enqueue(task);
+            myTaskQueue.Enqueue(task);
 
             if (!ActorIsExecuting)
             {
@@ -718,7 +715,7 @@ namespace ActSharp
 
                 //CheckIsDone();
 
-                myRetainedTaskList.Check();
+                ActorCheckRetainedTasks();
 
                 try
                 {
@@ -818,7 +815,7 @@ namespace ActSharp
 
                 //CheckIsDone();
 
-                myRetainedTaskList.Check();
+                ActorCheckRetainedTasks();
 
                 try
                 {
@@ -856,12 +853,18 @@ namespace ActSharp
 
                 //CheckIsDone();
 
-                myRetainedTaskList.Check();
+                ActorCheckRetainedTasks();
 
                 try
                 {
 
                     action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Actor Exception", e);
 
                 }
                 finally
@@ -876,17 +879,6 @@ namespace ActSharp
             });
 
             SetupTask(t);
-
-            myRetainedTaskList.Add(t, (task) => {
-
-                if(task.Exception != null)
-                {
-
-                    Environment.FailFast("Un-caught ActSharp.Actor Exception", task.Exception);
-
-                }
-
-            }, ContinuationContext.Immediate);
 
         }
 
@@ -903,7 +895,7 @@ namespace ActSharp
 
                 //CheckIsDone();
 
-                myRetainedTaskList.Check();
+                ActorCheckRetainedTasks();
 
                 try
                 {
@@ -939,7 +931,7 @@ namespace ActSharp
 
                 SetManagedThreadId();
 
-                myRetainedTaskList.Check();
+                ActorCheckRetainedTasks();
 
                 try
                 {
@@ -1119,6 +1111,12 @@ namespace ActSharp
                     action();
 
                 }
+                catch(Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Actor Exception", e);
+
+                }
                 finally
                 {
 
@@ -1131,17 +1129,6 @@ namespace ActSharp
             });
 
             SetupTask(t);
-
-            myRetainedTaskList.Add(t, (task) => {
-
-                if (task.Exception != null)
-                {
-
-                    Environment.FailFast("Un-caught ActSharp.Actor Exception", task.Exception);
-
-                }
-
-            }, ContinuationContext.Immediate);
 
         }
 
@@ -1228,7 +1215,7 @@ namespace ActSharp
         protected void ActorCheckRetainedTasks()
         {
 
-            myRetainedTaskList.Check();
+            myRetainedTaskList.Check(myTaskQueue);
 
         }
 
@@ -1243,8 +1230,6 @@ namespace ActSharp
             myOnIdleEvent.Dispose();
 
         }
-
-        //Task Executors
         
     }
 

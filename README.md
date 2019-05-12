@@ -104,6 +104,13 @@ As indicated by the example ActSharp.Async is an extension method namespace for 
 
 ### Changelog:
 
+Version 0.1.5:
+
+* ActorEnqueueFailFast and ActorEnqueueFailFastNoTaskListCheck now FailFast immediately on a caught exception
+* ActionAsyncEvent now has a Task returning Call method
+* Async_Action_Extensions void returning methods now call ThreadPool.QueueUserWorkItem
+* RetainedTaskList no longer requires a ConcurrentQueue<Task> instance on initialisation, now has a HasPrerequisites property, can be checked with or without a ConcurrentQueue<Task> instance
+
 Version 0.1.4:
 
 * Simplified the API

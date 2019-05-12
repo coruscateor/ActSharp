@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Concurrent;
 using ActSharp.Async;
+using System.Linq;
 
 namespace ActSharp
 {
@@ -17,19 +18,11 @@ namespace ActSharp
     {
 
         readonly List<TaskHolder> myTasks;
-        
-        //Execute any provided delegates on other threads if relevant
 
-        readonly ConcurrentQueue<Task> myActorExQueue;
-
-        public RetainedTaskList(ConcurrentQueue<Task> actorExQueue)
+        public RetainedTaskList()
         {
 
             myTasks = new List<TaskHolder>(0);
-
-            //myContinueOnCurrentThread = continueOnCurrentThread;
-
-            myActorExQueue = actorExQueue;
 
         }
 
@@ -111,12 +104,35 @@ namespace ActSharp
         public void Check()
         {
 
+            for (int i = 0; i < myTasks.Count; i++)
+            {
+
+                var item = myTasks[i];
+
+                if (item.Check(myTasks))
+                {
+
+                    //Remove item from list and decrement index
+
+                    myTasks.RemoveAt(i);
+
+                    i--;
+
+                }
+
+            }
+
+        }
+
+        public void Check(ConcurrentQueue<Task> actorExQueue)
+        {
+
             for(int i = 0; i < myTasks.Count; i++)
             {
 
                 var item = myTasks[i];
 
-                if(item.Check(myTasks, myActorExQueue))
+                if(item.Check(myTasks, actorExQueue))
                 {
 
                     //Remove item from list and decrement index
@@ -187,7 +203,28 @@ namespace ActSharp
 
             }
 
-            public bool Check(List<TaskHolder> tasks, ConcurrentQueue<Task> actorExQueue = null)
+            public bool HasPrerequisites
+            {
+
+                get
+                {
+
+                    bool has = myPrerequisites != null;
+
+                    if (has)
+                    {
+
+                        has = myPrerequisites.Count() > 0;
+
+                    }
+
+                    return has;
+
+                }
+
+            }
+
+            public bool Check(List<TaskHolder> tasks)
             {
 
                 if (myTask.IsCompleted && CheckPrerequisites())
@@ -201,18 +238,47 @@ namespace ActSharp
 
                             case ContinuationContext.Actor:
 
-                                if (actorExQueue != null)
-                                {
+                                return false;
 
-                                    actorExQueue.Enqueue(new Task(() => { myAction(myTask); }));
+                            case ContinuationContext.Async:
 
-                                }
-                                else
-                                {
+                                tasks.Add(new TaskHolder(myAction.Async(myTask)));
 
-                                    tasks.Add(new TaskHolder(myAction.Async(myTask)));
+                                break;
 
-                                }
+                            case ContinuationContext.Immediate:
+
+                                myAction(myTask);
+
+                                break;
+
+                        }
+
+                    }
+
+                    return true;
+
+                }
+
+                return false;
+
+            }
+
+            public bool Check(List<TaskHolder> tasks, ConcurrentQueue<Task> actorExQueue)
+            {
+
+                if (myTask.IsCompleted && CheckPrerequisites())
+                {
+
+                    if (myAction != null)
+                    {
+
+                        switch (myContinuationContext)
+                        {
+
+                            case ContinuationContext.Actor:
+
+                                actorExQueue.Enqueue(new Task(() => { myAction(myTask); }));
 
                                 break;
 
