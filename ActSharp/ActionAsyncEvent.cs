@@ -53,6 +53,24 @@ namespace ActSharp
 
         }
 
+        public Task<List<Task>> Call_(TSender sender, TEventArgs eventArgs)
+        {
+
+            return ActorEnqueueNoTaskListCheck(() => {
+
+                List<Task> results = new List<Task>();
+
+                //Call each action delegate on a separate thread
+
+                foreach (var item in myActionList)
+                    results.Add(item.Async(sender, eventArgs));
+
+                return results;
+
+            });
+
+        }
+
         public Task Call(TSender sender, TEventArgs eventArgs, List<Task> results)
         {
 
@@ -62,7 +80,7 @@ namespace ActSharp
 
                 results.Clear();
 
-                //Call each func delegate on a separate thread
+                //Call each action delegate on a separate thread
 
                 foreach (var item in myActionList)
                     results.Add(item.Async(sender, eventArgs));

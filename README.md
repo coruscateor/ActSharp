@@ -104,6 +104,10 @@ As indicated by the example ActSharp.Async is an extension method namespace for 
 
 ### Changelog:
 
+Version 0.1.6:
+
+* Added a Call_ method to ActionAsyncEvent to return a list of tasks when called
+
 Version 0.1.5:
 
 * ActorEnqueueFailFast and ActorEnqueueFailFastNoTaskListCheck now FailFast immediately on a caught exception
