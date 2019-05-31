@@ -100,9 +100,18 @@ Usage:
 
 As indicated by the example ActSharp.Async is an extension method namespace for executing delegates on thread pool threads.
 
+### To Do:
 
+* Add a unit tests project
+* Finalise the API and bump to 1.0 (it's practically finalised now)
 
 ### Changelog:
+
+Version 0.2.0:
+
+* Refactored the Actor class to reduce complexity
+* Fixed a WriteThreadId bug in the ActSharpDemo
+* Added happyActor.ActorIsActive output to the ActSharpDemo
 
 Version 0.1.6:
 

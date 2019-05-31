@@ -87,7 +87,7 @@ namespace ActSharpDemo
 
                 TotalSw.Stop();
 
-                Console.WriteLine("Call: " + i + " - Milliseconds: " + TotalSw.ElapsedMilliseconds + " - Ticks: " + TotalSw.ElapsedTicks); // + " - ActorManagedThreadId:" + happyActor.ActorManagedThreadId);
+                Console.WriteLine("Call: " + i + " - Milliseconds: " + TotalSw.ElapsedMilliseconds + " - Ticks: " + TotalSw.ElapsedTicks + " - IsActive: " + happyActor.ActorIsActive); // + " - ActorManagedThreadId:" + happyActor.ActorManagedThreadId);
 
                 TotalSw.Reset();
 
@@ -151,9 +151,13 @@ namespace ActSharpDemo
 
             }
 
+            taskResults.WaitAll();
+
             Console.WriteLine();
 
-            taskResults.WaitAll();
+            Console.WriteLine("happyActor.ActorIsActive: " + happyActor.ActorIsActive);
+
+            Console.WriteLine();
 
             Console.ReadLine();
 

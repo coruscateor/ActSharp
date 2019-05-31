@@ -22,9 +22,7 @@ namespace ActSharpDemo
         public Task<string> HelloWorld()
         {
 
-            WriteThreadId();
-
-            return ActorEnqueue(() => myId.ToString() + " - Hello World!");
+            return ActorEnqueue(() => { WriteThreadId(); return myId.ToString() + " - Hello World!"; });
 
         }
 

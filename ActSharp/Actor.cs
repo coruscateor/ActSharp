@@ -20,8 +20,6 @@ namespace ActSharp
 
         ConcurrentQueue<Task> myTaskQueue = new ConcurrentQueue<Task>();
 
-        SpinLock myCTLock;
-
         Task myCurrentTask;
 
         RetainedTaskList myRetainedTaskList = new RetainedTaskList();
@@ -30,40 +28,12 @@ namespace ActSharp
 
         int myManagedThreadId = -1;
 
-        SpinLock myManagedThreadIdLock;
+        SpinLock myStateLock;
+
+        bool myIsActive;
 
         public Actor()
         {
-        }
-
-        public bool ActorIsExecuting
-        {
-
-            get
-            {
-
-                //spinlock
-
-                bool taken = false;
-
-                myCTLock.Enter(ref taken);
-
-                try
-                {
-
-                    return myCurrentTask != null;
-
-                }
-                finally
-                {
-
-                    if (taken)
-                        myCTLock.Exit();
-
-                }
-
-            }
-
         }
 
         public int ActorExecuteQueueCount
@@ -90,13 +60,99 @@ namespace ActSharp
 
         }
 
-        public bool ActorIsIdle
+        //The actor is active when it has a current task or is about to set the current task
+
+        public bool ActorIsActive
         {
 
             get
             {
 
-                return ActorExecuteQueueIsEmpty && !ActorIsExecuting;
+                bool taken = false;
+
+                myStateLock.Enter(ref taken);
+
+                try
+                {
+
+                    return myIsActive;
+
+                }
+                finally
+                {
+
+                    if (taken)
+                        myStateLock.Exit();
+
+                }
+
+            }
+
+        }
+
+        //Make sure actor is in the active state
+
+        private bool TrySetActorIsActive()
+        {
+
+            bool taken = false;
+
+            myStateLock.Enter(ref taken);
+
+            try
+            {
+
+                if (!myIsActive)
+                {
+
+                    myIsActive = true;
+
+                    return true;
+
+                }
+
+            }
+            finally
+            {
+
+                if (taken)
+                    myStateLock.Exit();
+
+            }
+
+            return false;
+
+        }
+
+        private void SetInActive()
+        {
+
+            bool taken = false;
+
+            myStateLock.Enter(ref taken);
+
+            try
+            {
+
+                //Make sure the task queue is empty
+
+                //Could be detrimental for threads waiting on myStateLock
+
+                if (!myTaskQueue.IsEmpty)
+                    return;
+
+                myCurrentTask = null;
+
+                myManagedThreadId = -1;
+
+                myIsActive = false;
+
+            }
+            finally
+            {
+
+                if (taken)
+                    myStateLock.Exit();
 
             }
 
@@ -160,20 +216,12 @@ namespace ActSharp
 
             WaitAllImpl(actors);
 
-            //foreach (var actor in actors)
-            //    actor.ActorWaitForIdle();
-
         }
 
         public static void ActorWaitAll(params Actor[] actors)
         {
 
             WaitAllImpl(actors);
-
-            //foreach (var actor in actors)
-            //    actor.ActorWaitForIdle();
-
-            //WaitAll(actors);
 
         }
 
@@ -192,7 +240,7 @@ namespace ActSharp
                 foreach (var actor in actors)
                 {
 
-                    if(actor.ActorIsIdle)
+                    if(!actor.ActorIsActive)
                     {
 
                         idleActorIndex = i;
@@ -227,61 +275,6 @@ namespace ActSharp
 
         }
 
-        //public bool ActorWaitForIdleYeildOnce()
-        //{
-
-        //    SpinWait sw = new SpinWait();
-
-        //    bool returnNext = false;
-
-        //    while (!returnNext)
-        //    {
-
-        //        if (ActorIsIdle())
-        //            return true;
-
-        //        returnNext = sw.NextSpinWillYield;
-
-        //        sw.SpinOnce();
-
-        //    }
-
-        //    return false;
-
-        //}
-
-        //public bool ActorIsActive
-        //{
-
-        //    get
-        //    {
-
-        //        return !ActorQueueIsEmpty && ActorIsExecuting;
-
-        //    }
-
-        //}
-
-        //public bool ActorIsDone
-        //{
-
-        //    get
-        //    {
-
-        //        return myIsDone;
-
-        //    }
-
-        //}
-
-        //private void CheckIsDone()
-        //{
-
-        //    if (myIsDone)
-        //        throw new ActorDoneException();
-
-        //}
-
         public int ActorManagedThreadId
         {
 
@@ -290,7 +283,7 @@ namespace ActSharp
 
                 bool taken = false;
 
-                myManagedThreadIdLock.Enter(ref taken);
+                myStateLock.Enter(ref taken);
 
                 try
                 {
@@ -302,7 +295,7 @@ namespace ActSharp
                 {
 
                     if (taken)
-                        myManagedThreadIdLock.Exit();
+                        myStateLock.Exit();
 
                 }
 
@@ -329,7 +322,7 @@ namespace ActSharp
 
             bool taken = false;
 
-            myManagedThreadIdLock.Enter(ref taken);
+            myStateLock.Enter(ref taken);
 
             try
             {
@@ -341,30 +334,7 @@ namespace ActSharp
             {
 
                 if (taken)
-                    myManagedThreadIdLock.Exit();
-
-            }
-
-        }
-
-        private void InvaldateManagedThreadId()
-        {
-
-            bool taken = false;
-
-            myManagedThreadIdLock.Enter(ref taken);
-
-            try
-            {
-
-                myManagedThreadId = -1;
-
-            }
-            finally
-            {
-
-                if (taken)
-                    myManagedThreadIdLock.Exit();
+                    myStateLock.Exit();
 
             }
 
@@ -378,185 +348,81 @@ namespace ActSharp
 
         }
 
-        private Task CurrentTask
+        //private void RemoveCurrentTask()
+        //{
+
+        //    bool taken = false;
+
+        //    myStateLock.Enter(ref taken);
+
+        //    try
+        //    {
+
+        //        myCurrentTask = null;
+
+        //    }
+        //    finally
+        //    {
+
+        //        if (taken)
+        //            myStateLock.Exit();
+
+        //    }
+
+        //}
+
+        private void SetTaskAndStart(Task nextTask)
         {
 
-            get
-            {
-
-                bool taken = false;
-
-                myCTLock.Enter(ref taken);
-
-                try
-                {
-
-                    return myCurrentTask;
-
-                }
-                finally
-                {
-
-                    if (taken)
-                        myCTLock.Exit();
-
-                }
-
-            }
-            set
-            {
-
-                bool taken = false;
-
-                myCTLock.Enter(ref taken);
-
-                try
-                {
-
-                    myCurrentTask = value;
-
-                }
-                finally
-                {
-
-                    if (taken)
-                        myCTLock.Exit();
-
-                }
-
-            }
-
-        }
-
-        private bool HasCurrentTask
-        {
-
-            get
-            {
-
-                bool taken = false;
-
-                myCTLock.Enter(ref taken);
-
-                try
-                {
-
-                    return myCurrentTask == null;
-
-                }
-                finally
-                {
-
-                    if (taken)
-                        myCTLock.Exit();
-
-                }
-
-            }
-
-        }
-
-        private void RemoveCurrentTask()
-        {
-
-            CurrentTask = null;
-
-        }
-
-        private bool TrySetNextTask(Task task)
-        {
+            myOnIdleEvent.Reset();
 
             bool taken = false;
 
-            myCTLock.Enter(ref taken);
+            myStateLock.Enter(ref taken);
 
             try
             {
 
-                if (myCurrentTask == null)
-                {
-
-                    myCurrentTask = task;
-
-                    return true;
-
-                }
+                myCurrentTask = nextTask;
 
             }
             finally
             {
 
                 if (taken)
-                    myCTLock.Exit();
+                    myStateLock.Exit();
 
             }
 
-            return false;
+            nextTask.Start();
 
         }
 
         private void NextTask()
         {
 
-            if (!myOnIdleEvent.IsSet)
-                myOnIdleEvent.Reset();
-
-            //myCurrentTask must be null at this point
-
-            ActorCheckRetainedTasks();
-
             Task nextTask;
 
             if (myTaskQueue.TryDequeue(out nextTask))
             {
 
-                if (TrySetNextTask(nextTask))
-                {
-
-                    nextTask.Start();
-
-                }
-                else
-                {
-
-                    //If setting the next task fails put it back on the queue
-
-                    myTaskQueue.Enqueue(nextTask);
-
-                }
+                SetTaskAndStart(nextTask);
 
             }
-
-            //If the retained task list has items and no tasks are queued, start a retained task list check task
-
-            //the Actor is never idle if there are retained tasks still to check for completion 
-
-            //bool clHasTasks = myRetainedTaskList.HasTasks;
-
-            if (nextTask == null && myRetainedTaskList.HasTasks && myTaskQueue.IsEmpty)
+            else if(myRetainedTaskList.HasTasks)
             {
 
                 nextTask = new Task(CheckRetainedTaskListOnly);
 
-                if(TrySetNextTask(nextTask))
-                {
-
-                    nextTask.Start();
-
-                }
+                SetTaskAndStart(nextTask);
 
             }
-
-            if (!ActorIsExecuting && !myRetainedTaskList.HasTasks)
+            else
             {
-
-                //Actor is now idle
+                
+                SetInActive();
 
                 myOnIdleEvent.Set();
-
-                //Ensure thread id is invalidated if there are no further tasks 
-
-                //InvaldateManagedThreadId();
 
             }
 
@@ -567,21 +433,7 @@ namespace ActSharp
 
             ActorCheckRetainedTasks();
 
-            RemoveCurrentTask();
-
-            if (myRetainedTaskList.HasTasks && myTaskQueue.IsEmpty)
-            {
-
-                Task nextCheck = new Task(CheckRetainedTaskListOnly);
-
-                if (TrySetNextTask(nextCheck))
-                {
-
-                    nextCheck.Start();
-
-                }
-
-            }
+            NextTask();
 
         }
 
@@ -591,8 +443,6 @@ namespace ActSharp
         {
 
             Task task = new Task(action);
-
-            //ContinueWith(task);
 
             myTaskQueue.Enqueue(task);
 
@@ -674,7 +524,9 @@ namespace ActSharp
 
             myTaskQueue.Enqueue(task);
 
-            if (!ActorIsExecuting)
+            //Check next task if actor is inactive
+
+            if (TrySetActorIsActive())
             {
 
                 NextTask();
@@ -683,24 +535,7 @@ namespace ActSharp
 
         }
 
-        //private TTask SetupTask<TTask>(Task task)
-        //{
-
-        //    TTask at = new TTask(t, this);
-
-        //    SetupTask(task);
-
-        //}
-
-        private void ResetOnIdleEvent()
-        {
-
-            if (!myOnIdleEvent.IsSet)
-                myOnIdleEvent.Reset();
-
-        }
-
-        //Method Enqueueing
+        //Delegate Queueing
 
         //Actions
 
@@ -709,13 +544,11 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
 
-                //CheckIsDone();
-
                 ActorCheckRetainedTasks();
+
+                System.Diagnostics.Debugger.Break();
 
                 try
                 {
@@ -725,12 +558,6 @@ namespace ActSharp
                 }
                 finally
                 {
-
-                    RemoveCurrentTask();
-
-                    //Now seen as not executing
-
-                    //CheckIsDone();
 
                     NextTask();
 
@@ -809,11 +636,7 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
-
-                //CheckIsDone();
 
                 ActorCheckRetainedTasks();
 
@@ -825,8 +648,6 @@ namespace ActSharp
                 }
                 finally
                 {
-
-                    RemoveCurrentTask();
 
                     NextTask();
 
@@ -847,11 +668,7 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
-
-                //CheckIsDone();
 
                 ActorCheckRetainedTasks();
 
@@ -870,8 +687,6 @@ namespace ActSharp
                 finally
                 {
 
-                    RemoveCurrentTask();
-
                     NextTask();
 
                 }
@@ -889,11 +704,7 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
-
-                //CheckIsDone();
 
                 ActorCheckRetainedTasks();
 
@@ -905,8 +716,6 @@ namespace ActSharp
                 }
                 finally
                 {
-
-                    RemoveCurrentTask();
 
                     NextTask();
 
@@ -927,8 +736,6 @@ namespace ActSharp
 
             Task<TResult> t = new Task<TResult>(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
 
                 ActorCheckRetainedTasks();
@@ -942,17 +749,7 @@ namespace ActSharp
                 finally
                 {
 
-                    RemoveCurrentTask();
-
-                    //Now seen as not executing
-
-                    //CheckIsDone();
-
                     NextTask();
-
-                    //Now possibly seen as executing again
-
-                    //InvaldateManagedThreadId();
 
                 }
 
@@ -1027,8 +824,6 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
 
                 try
@@ -1039,13 +834,7 @@ namespace ActSharp
                 }
                 finally
                 {
-
-                    RemoveCurrentTask();
-
-                    //Now seen as not executing
-
-                    //CheckIsDone();
-
+                    
                     NextTask();
 
                 }
@@ -1067,8 +856,6 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
 
                 try
@@ -1079,8 +866,6 @@ namespace ActSharp
                 }
                 finally
                 {
-
-                    RemoveCurrentTask();
 
                     NextTask();
 
@@ -1101,8 +886,6 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
 
                 try
@@ -1119,8 +902,6 @@ namespace ActSharp
                 }
                 finally
                 {
-
-                    RemoveCurrentTask();
 
                     NextTask();
 
@@ -1139,8 +920,6 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
 
                 try
@@ -1151,8 +930,6 @@ namespace ActSharp
                 }
                 finally
                 {
-
-                    RemoveCurrentTask();
 
                     NextTask();
 
@@ -1173,8 +950,6 @@ namespace ActSharp
 
             Task<TResult> t = new Task<TResult>(() => {
 
-                ResetOnIdleEvent();
-
                 SetManagedThreadId();
 
                 try
@@ -1186,23 +961,11 @@ namespace ActSharp
                 finally
                 {
 
-                    RemoveCurrentTask();
-
-                    //Now seen as not executing
-
-                    //CheckIsDone();
-
                     NextTask();
-
-                    //Now possibly seen as executing again
-
-                    //InvaldateManagedThreadId();
 
                 }
 
             });
-
-            //Task<TResult> at = new Task<TResult>(t);
 
             SetupTask(t);
 
@@ -1221,9 +984,6 @@ namespace ActSharp
 
         public virtual void Dispose()
         {
-
-            //if (!ActorIsIdle)
-            //    throw new ActorStillActiveException();
 
             myOnIdleEvent.Wait();
 
