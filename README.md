@@ -1,6 +1,6 @@
 # ActSharp
 
-A light-weight actor and asynchronous programming framework for .NET.
+A light-weight actor and asynchronous programming framework for .NET Core.
 
 #### ActSharp namespace:
 
