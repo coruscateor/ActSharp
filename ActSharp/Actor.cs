@@ -158,6 +158,18 @@ namespace ActSharp
 
         }
 
+        public bool ActorIsIdle
+        {
+
+            get
+            {
+
+                return myOnIdleEvent.IsSet;
+
+            }
+
+        }
+
         public void ActorWaitForIdle()
         {
 
@@ -547,8 +559,6 @@ namespace ActSharp
                 SetManagedThreadId();
 
                 ActorCheckRetainedTasks();
-
-                System.Diagnostics.Debugger.Break();
 
                 try
                 {

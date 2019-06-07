@@ -236,6 +236,645 @@ namespace ActSharp.Async
 
         }
 
+        //Returning void UnSafe
+
+        public static void UnSafeAsyncIgnore(this Action action)
+        {
+
+            ThreadPool.UnsafeQueueUserWorkItem((obj) =>
+            {
+
+                try
+                {
+
+                    action();
+
+                }
+                catch
+                {
+                }
+
+            }, null);
+
+        }
+
+        public static void UnSafeAsyncFailFast(this Action action)
+        {
+
+            ThreadPool.UnsafeQueueUserWorkItem((obj) => {
+
+                try
+                {
+
+                    action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.UnSafeAsyncFailFast Exception", e);
+
+                }
+
+            }, null);
+
+        }
+
+        public static void UnSafeAsync(this Action action, Action<Exception> exceptionAction)
+        {
+
+            ThreadPool.UnsafeQueueUserWorkItem((obj) =>
+            {
+
+                try
+                {
+
+                    action();
+
+                }
+                catch (Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null);
+
+        }
+
+        //Waiting
+
+        //int
+
+        public static void AsyncWaitIgnore(this Action action, WaitHandle waitObject, int millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch
+                {
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void AsyncWaitFailFast(this Action action, WaitHandle waitObject, int millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.AsyncWaitFailFast Exception", e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void AsyncWait(this Action action, WaitHandle waitObject, int millisecondsTimeOutInterval, Action<Exception> exceptionAction, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        //uint
+
+        public static void AsyncWaitIgnore(this Action action, WaitHandle waitObject, uint millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if(timedOut)
+                        action();
+
+                }
+                catch
+                {
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void AsyncWaitFailFast(this Action action, WaitHandle waitObject, uint millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.AsyncWaitFailFast Exception", e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void AsyncWait(this Action action, WaitHandle waitObject, uint millisecondsTimeOutInterval, Action<Exception> exceptionAction, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        //long
+
+        public static void AsyncWaitIgnore(this Action action, WaitHandle waitObject, long millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch
+                {
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void AsyncWaitFailFast(this Action action, WaitHandle waitObject, long millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.AsyncWaitFailFast Exception", e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void AsyncWait(this Action action, WaitHandle waitObject, long millisecondsTimeOutInterval, Action<Exception> exceptionAction, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        //TimeSpan
+
+        public static void AsyncWaitIgnore(this Action action, WaitHandle waitObject, TimeSpan timeout, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch
+                {
+                }
+
+            }, null, timeout, executeOnlyOnce);
+
+        }
+
+        public static void AsyncWaitFailFast(this Action action, WaitHandle waitObject, TimeSpan timeout, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.AsyncWaitFailFast Exception", e);
+
+                }
+
+            }, null, timeout, executeOnlyOnce);
+
+        }
+
+        public static void AsyncWait(this Action action, WaitHandle waitObject, TimeSpan timeout, Action<Exception> exceptionAction, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.RegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null, timeout, executeOnlyOnce);
+
+        }
+
+        //Waiting - Unsafe
+
+        //int
+
+        public static void UnsafeAsyncWaitIgnore(this Action action, WaitHandle waitObject, int millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch
+                {
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void UnsafeAsyncWaitFailFast(this Action action, WaitHandle waitObject, int millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.UnsafeAsyncWaitFailFast Exception", e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void UnsafeAsyncWait(this Action action, WaitHandle waitObject, int millisecondsTimeOutInterval, Action<Exception> exceptionAction, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        //uint
+
+        public static void UnsafeAsyncWaitIgnore(this Action action, WaitHandle waitObject, uint millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch
+                {
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void UnsafeAsyncWaitFailFast(this Action action, WaitHandle waitObject, uint millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.UnsafeAsyncWaitFailFast Exception", e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void UnsafeAsyncWait(this Action action, WaitHandle waitObject, uint millisecondsTimeOutInterval, Action<Exception> exceptionAction, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        //long
+
+        public static void UnsafeAsyncWaitIgnore(this Action action, WaitHandle waitObject, long millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch
+                {
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void UnsafeAsyncWaitFailFast(this Action action, WaitHandle waitObject, long millisecondsTimeOutInterval, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.UnsafeAsyncWaitFailFast Exception", e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        public static void UnsafeAsyncWait(this Action action, WaitHandle waitObject, long millisecondsTimeOutInterval, Action<Exception> exceptionAction, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null, millisecondsTimeOutInterval, executeOnlyOnce);
+
+        }
+
+        //TimeSpan
+
+        public static void UnsafeAsyncWaitIgnore(this Action action, WaitHandle waitObject, TimeSpan timeout, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch
+                {
+                }
+
+            }, null, timeout, executeOnlyOnce);
+
+        }
+
+        public static void UnsafeAsyncWaitFailFast(this Action action, WaitHandle waitObject, TimeSpan timeout, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    Environment.FailFast("Un-caught ActSharp.Async.Async_Action_Extensions.UnsafeAsyncWaitFailFast Exception", e);
+
+                }
+
+            }, null, timeout, executeOnlyOnce);
+
+        }
+
+        public static void UnsafeAsyncWait(this Action action, WaitHandle waitObject, TimeSpan timeout, Action<Exception> exceptionAction, bool executeOnlyOnce = true)
+        {
+
+            ThreadPool.UnsafeRegisterWaitForSingleObject(waitObject, (state, timedOut) =>
+            {
+
+                try
+                {
+
+                    if (timedOut)
+                        action();
+
+                }
+                catch (Exception e)
+                {
+
+                    exceptionAction(e);
+
+                }
+
+            }, null, timeout, executeOnlyOnce);
+
+        }
+
     }
 
 }

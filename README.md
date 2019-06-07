@@ -104,8 +104,16 @@ As indicated by the example ActSharp.Async is an extension method namespace for 
 
 * Add a unit tests project
 * Finalise the API and bump to 1.0 (it's practically finalised now)
+* Re-do the expamle project
 
 ### Changelog:
+
+Version 0.3.0:
+
+* Added an ActorIsIdle property to the Actor class
+* Added UnSafeAsync static methods to the Async Action extensions
+* Added AsyncWait and UnsafeAsyncWait static methods to the Async Action extensions
+* All projects now target .NET Core 2.2
 
 Version 0.2.0:
 
