@@ -8,7 +8,7 @@ namespace ActSharp.System
     public sealed class RandomActor : Actor
     {
 
-        Random myRandom;
+        readonly Random myRandom;
 
         public RandomActor()
         {
@@ -24,38 +24,38 @@ namespace ActSharp.System
 
         }
 
-        public Task<int> Next()
+        public ActorTask<int> Next()
         {
 
-            return ActorEnqueueNoTaskListCheck(myRandom.Next);
+            return ActorSetupNoPreDelegate(myRandom.Next);
 
         }
 
-        public Task<int> Next(int maxValue)
+        public ActorTask<int> Next(int maxValue)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => myRandom.Next(maxValue));
+            return ActorSetupNoPreDelegate(() => myRandom.Next(maxValue));
 
         }
 
-        public Task<int> Next(int minValue, int maxValue)
+        public ActorTask<int> Next(int minValue, int maxValue)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => myRandom.Next(minValue, maxValue));
+            return ActorSetupNoPreDelegate(() => myRandom.Next(minValue, maxValue));
 
         }
 
-        public Task NextBytes(byte[] buffer)
+        public ActorTask NextBytes(byte[] buffer)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => myRandom.NextBytes(buffer));
+            return ActorSetupNoPreDelegate(() => myRandom.NextBytes(buffer));
 
         }
 
-        public Task<double> NextDouble()
+        public ActorTask<double> NextDouble()
         {
 
-            return ActorEnqueueNoTaskListCheck(myRandom.NextDouble);
+            return ActorSetupNoPreDelegate(myRandom.NextDouble);
 
         }
 

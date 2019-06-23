@@ -4,23 +4,24 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections;
-using System.Collections.Concurrent;
 using ActSharp.Executors;
 
 namespace ActSharp
 {
 
     /// <summary>
-    /// The base class for Actor objects.
+    /// A bocking queue implementation of the Actor class.
+    ///
+    /// The queue is synchronised with Monitor locks hence the name "BActor"
     /// 
-    /// The idea behind actors in this framework is that all methods that would otherwise be public in decendant actor types are hidden and exposed though proxy methods which basically execute the hidden methods on the thread pool in serial as called on individual actor instances. 
+    /// This implementation may yeild better performance than the default Actor in highly-concurrent situations
     /// </summary>
-    public abstract class Actor : ActorBase, IActor, IDisposable
+    public abstract class BActor : ActorBase, IActor, IDisposable
     {
 
-        ConcurrentQueue<Task> myTaskQueue = new ConcurrentQueue<Task>();
+        Queue<Task> myTaskQueue = new Queue<Task>();
 
-        public Actor()
+        public BActor()
         {
         }
 
@@ -30,7 +31,12 @@ namespace ActSharp
             get
             {
 
-                return myTaskQueue.Count;
+                lock (myTaskQueue)
+                { 
+
+                    return myTaskQueue.Count;
+
+                }
 
             }
 
@@ -42,7 +48,29 @@ namespace ActSharp
             get
             {
 
-                return myTaskQueue.IsEmpty;
+                lock (myTaskQueue)
+                {
+
+                    return myTaskQueue.Count < 1;
+
+                }
+
+            }
+
+        }
+
+        [DoNotCall]
+        protected bool __ActorExecuteQueueIsEmptyNotLocked
+        {
+
+            get
+            {
+
+                //__ActorCheckIsSameAssembly();
+
+                //AssFrameChecker assFrameChecker = new AssFrameChecker();
+
+                return myTaskQueue.Count < 1;
 
             }
 
@@ -83,39 +111,42 @@ namespace ActSharp
         protected override void __ActorSetInActive()
         {
 
+            //__ActorCheckIsSameAssembly();
+
             //if (assFrameChecker == null)
             //    assFrameChecker = new AssFrameChecker(1);
 
-            //__ActorCheckIsSameAssembly();
-
-            //AssFrameChecker assFrameChecker = new AssFrameChecker();
-
-            bool taken = false;
-
-            myStateLock.Enter(ref taken);
-
-            try
+            lock (myTaskQueue)
             {
 
-                //Make sure the task queue is empty
+                bool taken = false;
 
-                //Could be detrimental for threads waiting on myStateLock
+                myStateLock.Enter(ref taken);
 
-                if (!myTaskQueue.IsEmpty)
-                    return;
+                try
+                {
 
-                //myCurrentTask = null;
+                    //Make sure the task queue is empty
 
-                myManagedThreadId = -1;
+                    //Could be detrimental for threads waiting on myStateLock
 
-                myIsActive = false;
+                    if (!(myTaskQueue.Count < 1))
+                        return;
 
-            }
-            finally
-            {
+                    //myCurrentTask = null;
 
-                if (taken)
-                    myStateLock.Exit();
+                    myManagedThreadId = -1;
+
+                    myIsActive = false;
+
+                }
+                finally
+                {
+
+                    if (taken)
+                        myStateLock.Exit();
+
+                }
 
             }
 
@@ -158,7 +189,16 @@ namespace ActSharp
 
             Task nextTask;
 
-            if (myTaskQueue.TryDequeue(out nextTask))
+            bool result;
+
+            lock (myTaskQueue)
+            {
+
+                result = myTaskQueue.TryDequeue(out nextTask);
+
+            }
+
+            if (result)
             {
 
                 //SetTaskAndStart(nextTask);
@@ -184,7 +224,12 @@ namespace ActSharp
 
         //    Task task = new Task(action);
 
-        //    myTaskQueue.Enqueue(task);
+        //    lock (myTaskQueue)
+        //    {
+
+        //        myTaskQueue.Enqueue(task);
+
+        //    }
 
         //    return task;
 
@@ -193,14 +238,19 @@ namespace ActSharp
         protected override void __ActorEnqueue(Task task)
         {
 
+            //__ActorCheckIsSameAssembly();
+
             //if (assFrameChecker == null)
             //    assFrameChecker = new AssFrameChecker(1);
 
-            //__ActorCheckIsSameAssembly();
-
             __ActorCheckTask(task);
 
-             myTaskQueue.Enqueue(task);
+            lock (myTaskQueue)
+            {
+
+                myTaskQueue.Enqueue(task);
+
+            }
 
             //Check next task if actor is inactive
 
@@ -212,49 +262,7 @@ namespace ActSharp
             }
 
         }
-
-        public static ActorTask Call(Func<Task, ActorTask> func, Task withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask Call(Func<ActorTask, ActorTask> func, ActorTask withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask<T> Call<T>(Func<Task<T>, ActorTask<T>> func, Task<T> withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask<T> Call<T>(Func<ActorTask<T>, ActorTask<T>> func, ActorTask<T> withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask<TR> Call<T, TR>(Func<Task<T>, ActorTask<TR>> func, Task<T> withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask<TR> Call<T, TR>(Func<ActorTask<T>, ActorTask<TR>> func, ActorTask<T> withTask)
-        {
-
-            return func(withTask);
-
-        }
-
+        
     }
 
 }

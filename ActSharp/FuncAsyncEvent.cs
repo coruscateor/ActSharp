@@ -16,10 +16,10 @@ namespace ActSharp
         {
         }
 
-        public void Subscribe(Func<TSender, TEventArgs, TResult> item)
+        public ActorTask Subscribe(Func<TSender, TEventArgs, TResult> item)
         {
 
-            ActorEnqueueFailFastNoTaskListCheck(() => {
+            return ActorSetupFailFastNoPreDelegate(() => {
 
                 if (!myFuncList.Contains(item))
                     myFuncList.Add(item);
@@ -28,10 +28,10 @@ namespace ActSharp
 
         }
 
-        public void UnSubscribe(Func<TSender, TEventArgs, TResult> item)
+        public ActorTask UnSubscribe(Func<TSender, TEventArgs, TResult> item)
         {
 
-            ActorEnqueueFailFastNoTaskListCheck(() => {
+            return ActorSetupFailFastNoPreDelegate(() => {
 
                 myFuncList.Remove(item);
 
@@ -39,10 +39,10 @@ namespace ActSharp
 
         }
 
-        public Task<List<Task<TResult>>> Call(TSender sender, TEventArgs eventArgs)
+        public ActorTask<List<Task<TResult>>> Call(TSender sender, TEventArgs eventArgs)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 List<Task<TResult>> results = new List<Task<TResult>>();
 
@@ -57,10 +57,10 @@ namespace ActSharp
 
         }
 
-        public Task Call(TSender sender, TEventArgs eventArgs, List<Task<TResult>> results)
+        public ActorTask Call(TSender sender, TEventArgs eventArgs, List<Task<TResult>> results)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 results.Capacity = myFuncList.Capacity;
 
@@ -75,10 +75,10 @@ namespace ActSharp
 
         }
 
-        public Task<int> Count()
+        public ActorTask<int> Count()
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 return myFuncList.Count;
 

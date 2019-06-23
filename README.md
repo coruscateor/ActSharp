@@ -103,10 +103,21 @@ As indicated by the example ActSharp.Async is an extension method namespace for 
 ### To Do:
 
 * Add a unit tests project
-* Finalise the API and bump to 1.0 (it's practically finalised now)
+* Finalise the API and bump to 1.0
 * Re-do the example project
+* Cleanup and document the code
+* Sort out actor continuations
 
 ### Changelog:
+
+Version 0.4.0:
+
+* Massive update to the ActSharp project; The ActorBase abstract class has been spun out of the Actor class to allow for other implementations of ActSharp based actors
+* A BActor implementation of the Actor class which uses a generic queue and Monitor based locking has been added
+* ActorTasks have been added to encapsulate tasks and ensure they are not started prematurely and to deal to with actor specific situations
+* Tasks have been replaced with ActorTasks for all actor classes
+* Reworked RetainedTasks and added a ConcurrentQueue implementation
+* Other less significant changes
 
 Version 0.3.0:
 

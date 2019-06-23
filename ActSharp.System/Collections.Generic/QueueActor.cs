@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace ActSharp.System.Collections.Generic
 {
 
-    public sealed class QueueActor<T> : Actor, IEnumerable<Task<(T, bool)>> //, IEnumerable<Task<(T, bool)>>
+    public sealed class QueueActor<T> : Actor, IEnumerable<ActorTask<(T, bool)>> //, IEnumerable<Task<(T, bool)>>
     {
 
-        Queue<T> myQueue;
+        readonly Queue<T> myQueue;
 
         public QueueActor()
         {
@@ -33,52 +33,52 @@ namespace ActSharp.System.Collections.Generic
 
         }
 
-        public Task<int> Count()
+        public ActorTask<int> Count()
         {
 
-            return ActorEnqueueNoTaskListCheck(() => myQueue.Count);
+            return ActorSetupNoPreDelegate(() => myQueue.Count);
 
         }
 
-        public Task<bool> IsEmpty()
+        public ActorTask<bool> IsEmpty()
         {
 
-            return ActorEnqueueNoTaskListCheck(() => myQueue.Count < 1);
+            return ActorSetupNoPreDelegate(() => myQueue.Count < 1);
 
         }
 
-        public Task Clear()
+        public ActorTask Clear()
         {
 
-            return ActorEnqueueNoTaskListCheck(myQueue.Clear);
+            return ActorSetupNoPreDelegate(myQueue.Clear);
 
         }
 
-        public Task<bool> Contains(T item)
+        public ActorTask<bool> Contains(T item)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => myQueue.Contains(item));
+            return ActorSetupNoPreDelegate(() => myQueue.Contains(item));
 
         }
 
-        public Task CopyTo(T[] array, int arrayIndex)
+        public ActorTask CopyTo(T[] array, int arrayIndex)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => myQueue.CopyTo(array, arrayIndex));
+            return ActorSetupNoPreDelegate(() => myQueue.CopyTo(array, arrayIndex));
 
         }
 
-        public Task<T> Dequeue()
+        public ActorTask<T> Dequeue()
         {
 
-            return ActorEnqueueNoTaskListCheck(myQueue.Dequeue);
+            return ActorSetupNoPreDelegate(myQueue.Dequeue);
 
         }
 
-        public Task<(T, bool)> TryDequeue()
+        public ActorTask<(T, bool)> TryDequeue()
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 var result = (Result: default(T), Found: false);
 
@@ -97,30 +97,30 @@ namespace ActSharp.System.Collections.Generic
 
         }
 
-        public Task Enqueue(T item)
+        public ActorTask Enqueue(T item)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => myQueue.Enqueue(item));
+            return ActorSetupNoPreDelegate(() => myQueue.Enqueue(item));
 
         }
 
-        public Task<(T, bool)> TryGetEnumerated(int index)
+        public ActorTask<(T, bool)> TryGetEnumerated(int index)
         {
 
             if (index < 0)
             {
 
-                var task = new global::System.Threading.Tasks.Task<(T, bool)>(() => (default(T), false));
+                var task = new Task<(T, bool)>(() => { throw new IndexOutOfRangeException(); });
 
                 task.Start();
 
-                //return new Task<(T, bool)>(task);
+                ActorTask<(T, bool)> at = new ActorTask<(T, bool)>(task, this);
 
-                return task;
+                return at;
 
-            }//(Result: default(T), Found: false);
+            }
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 var result = (Result: default(T), Found: false);
 
@@ -148,7 +148,7 @@ namespace ActSharp.System.Collections.Generic
 
         }
 
-        public IEnumerator<Task<(T, bool)>> GetEnumerator()
+        public IEnumerator<ActorTask<(T, bool)>> GetEnumerator()
         {
 
             int index = 0;
@@ -183,10 +183,10 @@ namespace ActSharp.System.Collections.Generic
 
         }
 
-        public Task ForEach(Action<T> action)
+        public ActorTask ForEach(Action<T> action)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 foreach (T item in myQueue)
                 {
@@ -199,10 +199,10 @@ namespace ActSharp.System.Collections.Generic
 
         }
 
-        public Task ForEach(Action<T, int> action)
+        public ActorTask ForEach(Action<T, int> action)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 int index = 0;
 
@@ -219,24 +219,24 @@ namespace ActSharp.System.Collections.Generic
 
         }
 
-        public Task<Queue<T>> CloneQueue()
+        public ActorTask<Queue<T>> CloneQueue()
         {
 
-            return ActorEnqueueNoTaskListCheck(() => new Queue<T>(myQueue));
+            return ActorSetupNoPreDelegate(() => new Queue<T>(myQueue));
 
         }
 
-        public Task<T> Peek()
+        public ActorTask<T> Peek()
         {
 
-            return ActorEnqueueNoTaskListCheck(myQueue.Peek);
+            return ActorSetupNoPreDelegate(myQueue.Peek);
 
         }
 
-        public Task<(T, bool)> TryPeek()
+        public ActorTask<(T, bool)> TryPeek()
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 var result = (Result: default(T), Found: false);
 
@@ -255,17 +255,17 @@ namespace ActSharp.System.Collections.Generic
 
         }
 
-        public Task<T[]> ToArray()
+        public ActorTask<T[]> ToArray()
         {
 
-            return ActorEnqueueNoTaskListCheck(myQueue.ToArray);
+            return ActorSetupNoPreDelegate(myQueue.ToArray);
 
         }
 
-        public Task TrimExcess()
+        public ActorTask TrimExcess()
         {
 
-            return ActorEnqueueNoTaskListCheck(myQueue.TrimExcess);
+            return ActorSetupNoPreDelegate(myQueue.TrimExcess);
 
         }
 

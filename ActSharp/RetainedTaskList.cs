@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Concurrent;
 using ActSharp.Async;
-using System.Linq;
 
 namespace ActSharp
 {
@@ -14,33 +13,59 @@ namespace ActSharp
     /// <summary>
     /// For retaining task objects beyond the lifetime of any given method call.
     /// </summary>
-    public class RetainedTaskList
+    public sealed class RetainedTaskList
     {
 
-        readonly List<TaskHolder> myTasks;
+        readonly List<IRetainedTaskContainer> myTasks;
 
-        public RetainedTaskList()
+        //Execute any provided delegates on other threads if relevant
+
+        readonly Action<Task> myActorExQueueAction;
+
+        public RetainedTaskList(Action<Task> actorExQueueAction)
         {
 
-            myTasks = new List<TaskHolder>(0);
+            myTasks = new List<IRetainedTaskContainer>();
+
+            //myContinueOnCurrentThread = continueOnCurrentThread;
+
+            myActorExQueueAction = actorExQueueAction;
 
         }
 
-        public void Add(Task task, Action<Task> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+        public void Add(Task task, Action<Task, ContinuationContext> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
             CheckTaskIsScheduled(task);
 
-            myTasks.Add(new TaskHolder(task, action, continuationContext, prerequisites));
+            myTasks.Add(new RetainedTaskContainer(task, action, continuationContext, prerequisites));
 
         }
 
-        public void Add<T>(Task<T> task, Action<Task> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+        public void Add<T>(Task<T> task, Action<Task<T>, ContinuationContext> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
         {
 
             CheckTaskIsScheduled(task);
 
-            myTasks.Add(new TaskHolder(task, action, continuationContext, prerequisites));
+            myTasks.Add(new RetainedTaskContainer<T>(task, action, continuationContext, prerequisites));
+
+        }
+
+        public void Add(ActorTask task, Action<ActorTask, ContinuationContext> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+        {
+
+            CheckTaskIsScheduled(task);
+
+            myTasks.Add(new RetainedActorTaskContainer(task, action, continuationContext, prerequisites));
+
+        }
+
+        public void Add<T>(ActorTask<T> task, Action<ActorTask<T>, ContinuationContext> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
+        {
+
+            CheckTaskIsScheduled(task);
+
+            myTasks.Add(new RetainedActorTaskContainer<T>(task, action, continuationContext, prerequisites));
 
         }
 
@@ -69,7 +94,40 @@ namespace ActSharp
 
         }
 
+        public int Remove(IActorTask task)
+        {
+
+            for (int i = 0; i < myTasks.Count; i++)
+            {
+
+                var item = myTasks[i];
+
+                if (item.Has(task))
+                {
+
+                    //Remove item from list and decrement index
+
+                    myTasks.RemoveAt(i);
+
+                    return i;
+
+                }
+
+            }
+
+            return -1;
+
+        }
+
         void CheckTaskIsScheduled(Task task)
+        {
+
+            if (task.Status == TaskStatus.Created)
+                throw new TaskNotScheduledException();
+
+        }
+
+        void CheckTaskIsScheduled(IActorTask task)
         {
 
             if (task.Status == TaskStatus.Created)
@@ -104,12 +162,22 @@ namespace ActSharp
         public void Check()
         {
 
+            //foreach (var item in myTasks)
+            //{
+
+            //    item.Check();
+
+            //}
+
+            //if (!HasTasks)
+            //    return;
+
             for (int i = 0; i < myTasks.Count; i++)
             {
 
                 var item = myTasks[i];
 
-                if (item.Check(myTasks))
+                if (item.Check(myTasks.Add, myActorExQueueAction))
                 {
 
                     //Remove item from list and decrement index
@@ -119,197 +187,6 @@ namespace ActSharp
                     i--;
 
                 }
-
-            }
-
-        }
-
-        public void Check(ConcurrentQueue<Task> actorExQueue)
-        {
-
-            for(int i = 0; i < myTasks.Count; i++)
-            {
-
-                var item = myTasks[i];
-
-                if(item.Check(myTasks, actorExQueue))
-                {
-
-                    //Remove item from list and decrement index
-
-                    myTasks.RemoveAt(i);
-
-                    i--;
-
-                }
-
-            }
-
-        }
-
-        class TaskHolder
-        {
-
-            readonly Task myTask;
-
-            readonly Action<Task> myAction;
-
-            readonly ContinuationContext myContinuationContext;
-
-            readonly IEnumerable<IAsyncResult> myPrerequisites;
-
-            public TaskHolder(Task task, Action<Task> action = null, ContinuationContext continuationContext = ContinuationContext.Actor, IEnumerable<IAsyncResult> prerequisites = null)
-            {
-
-                myTask = task;
-
-                myAction = action;
-
-                myContinuationContext = continuationContext;
-
-                myPrerequisites = prerequisites;
-
-            }
-
-            bool CheckPrerequisites()
-            {
-
-                if (myPrerequisites != null)
-                {
-
-                    foreach (var item in myPrerequisites)
-                    {
-
-                        if (!item.IsCompleted)
-                            return false;
-
-                    }
-
-                }
-
-                return true;
-
-            }
-
-            public IEnumerable<IAsyncResult> Prerequisites
-            {
-
-                get
-                {
-
-                    return myPrerequisites;
-
-                }
-
-            }
-
-            public bool HasPrerequisites
-            {
-
-                get
-                {
-
-                    bool has = myPrerequisites != null;
-
-                    if (has)
-                    {
-
-                        has = myPrerequisites.Count() > 0;
-
-                    }
-
-                    return has;
-
-                }
-
-            }
-
-            public bool Check(List<TaskHolder> tasks)
-            {
-
-                if (myTask.IsCompleted && CheckPrerequisites())
-                {
-
-                    if (myAction != null)
-                    {
-
-                        switch (myContinuationContext)
-                        {
-
-                            case ContinuationContext.Actor:
-
-                                return false;
-
-                            case ContinuationContext.Async:
-
-                                tasks.Add(new TaskHolder(myAction.Async(myTask)));
-
-                                break;
-
-                            case ContinuationContext.Immediate:
-
-                                myAction(myTask);
-
-                                break;
-
-                        }
-
-                    }
-
-                    return true;
-
-                }
-
-                return false;
-
-            }
-
-            public bool Check(List<TaskHolder> tasks, ConcurrentQueue<Task> actorExQueue)
-            {
-
-                if (myTask.IsCompleted && CheckPrerequisites())
-                {
-
-                    if (myAction != null)
-                    {
-
-                        switch (myContinuationContext)
-                        {
-
-                            case ContinuationContext.Actor:
-
-                                actorExQueue.Enqueue(new Task(() => { myAction(myTask); }));
-
-                                break;
-
-                            case ContinuationContext.Async:
-
-                                tasks.Add(new TaskHolder(myAction.Async(myTask)));
-
-                                break;
-
-                            case ContinuationContext.Immediate:
-
-                                myAction(myTask);
-
-                                break;
-
-                        }
-
-                    }
-
-                    return true;
-
-                }
-
-                return false;
-
-            }
-
-            public bool Has(Task task)
-            {
-
-                return myTask == task;
 
             }
 

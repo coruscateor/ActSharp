@@ -19,17 +19,17 @@ namespace ActSharpDemo
 
         }
 
-        public Task<string> HelloWorld()
+        public ActorTask<string> HelloWorld()
         {
 
-            return ActorEnqueue(() => { WriteThreadId(); return myId.ToString() + " - Hello World!"; });
+            return ActorSetup(() => { WriteThreadId(); return myId.ToString() + " - Hello World!"; });
 
         }
 
-        public Task<int> Add()
+        public ActorTask<int> Add()
         {
 
-            return ActorEnqueue(() => {
+            return ActorSetup(() => {
 
                 Random rnd = new Random();
 

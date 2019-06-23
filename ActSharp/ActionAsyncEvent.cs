@@ -16,10 +16,10 @@ namespace ActSharp
         {
         }
 
-        public void Subscribe(Action<TSender, TEventArgs> item)
+        public ActorTask Subscribe(Action<TSender, TEventArgs> item)
         {
 
-            ActorEnqueueFailFastNoTaskListCheck(() => {
+            return ActorSetupFailFastNoPreDelegate(() => {
 
                 if(!myActionList.Contains(item))
                     myActionList.Add(item);
@@ -28,10 +28,10 @@ namespace ActSharp
 
         }
 
-        public void UnSubscribe(Action<TSender, TEventArgs> item)
+        public ActorTask UnSubscribe(Action<TSender, TEventArgs> item)
         {
 
-            ActorEnqueueFailFastNoTaskListCheck(() => {
+            return ActorSetupFailFastNoPreDelegate(() => {
 
                 myActionList.Remove(item);
 
@@ -39,10 +39,10 @@ namespace ActSharp
 
         }
 
-        public void Call(TSender sender, TEventArgs eventArgs)
+        public ActorTask Call(TSender sender, TEventArgs eventArgs)
         {
 
-            ActorEnqueueFailFastNoTaskListCheck(() => {
+            return ActorSetupFailFastNoPreDelegate(() => {
 
                 //Call each action delegate on a separate thread
 
@@ -53,10 +53,10 @@ namespace ActSharp
 
         }
 
-        public Task<List<Task>> Call_(TSender sender, TEventArgs eventArgs)
+        public ActorTask<List<Task>> Call_(TSender sender, TEventArgs eventArgs)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 List<Task> results = new List<Task>();
 
@@ -71,10 +71,10 @@ namespace ActSharp
 
         }
 
-        public Task Call(TSender sender, TEventArgs eventArgs, List<Task> results)
+        public ActorTask Call(TSender sender, TEventArgs eventArgs, List<Task> results)
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 results.Capacity = myActionList.Capacity;
 
@@ -89,10 +89,10 @@ namespace ActSharp
 
         }
 
-        public Task<int> Count()
+        public ActorTask<int> Count()
         {
 
-            return ActorEnqueueNoTaskListCheck(() => {
+            return ActorSetupNoPreDelegate(() => {
 
                 return myActionList.Count;
 

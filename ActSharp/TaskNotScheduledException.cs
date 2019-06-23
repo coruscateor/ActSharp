@@ -9,7 +9,7 @@ namespace ActSharp
     {
 
         public TaskNotScheduledException()
-            : base("Task must be scheduled")
+            : base("Task must be scheduled to execute")
         {
         }
 

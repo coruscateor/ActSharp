@@ -74,7 +74,7 @@ namespace ActSharpDemo
 
             Console.WriteLine();
 
-            List<Task<int>> results = new List<Task<int>>(100);
+            List<ActorTask<int>> results = new List<ActorTask<int>>(100);
 
             TotalSw.Reset();
 
