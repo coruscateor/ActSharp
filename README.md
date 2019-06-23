@@ -18,24 +18,24 @@ namespace ActSharpDemoImplementation
 		{
 		}
 
-		public Task HelloWorld()
+		public ActorTask HelloWorld()
 		{
 
-			return ActorEnqueue(() => Console.WriteLine("Hello World!"));
+			return ActorSetup(() => Console.WriteLine("Hello World!"));
 
 		}
 
-		public Task<int> TwoPlusTwo()
+		public ActorTask<int> TwoPlusTwo()
 		{
 
-			return ActorEnqueue(() => 2 + 2);
+			return ActorSetup(() => 2 + 2);
 
 		}
 
-		public Task<int> Add(int a, int b)
+		public ActorTask<int> Add(int a, int b)
 		{
 
-			return ActorEnqueue(() => {
+			return ActorSetup(() => {
 
 				return a + b;
 
