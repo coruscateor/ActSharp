@@ -38,10 +38,31 @@ namespace ActSharp
 
         //The actor is active when it has a current task or is about to set the current task
 
-        public abstract bool ActorIsActive
+        public virtual bool ActorIsActive
         {
 
-            get;
+            get
+            {
+
+                bool taken = false;
+
+                myStateLock.Enter(ref taken);
+
+                try
+                {
+
+                    return myIsActive;
+
+                }
+                finally
+                {
+
+                    if (taken)
+                        myStateLock.Exit();
+
+                }
+
+            }
 
         }
 
@@ -51,10 +72,7 @@ namespace ActSharp
         protected virtual bool __ActorTrySetIsActive()
         {
 
-            //__ActorCheckIsSameAssembly();
-
-            //if (assFrameChecker == null)
-            //    assFrameChecker = new AssFrameChecker(1);
+            bool result = false;
 
             bool taken = false;
 
@@ -68,7 +86,7 @@ namespace ActSharp
 
                     myIsActive = true;
 
-                    return true;
+                    result = true;
 
                 }
 
@@ -81,7 +99,10 @@ namespace ActSharp
 
             }
 
-            return false;
+            if(result)
+                myOnIdleEvent.Reset();
+
+            return result;
 
         }
 
@@ -185,7 +206,8 @@ namespace ActSharp
 
         }
 
-        protected void SetManagedThreadId()
+        [DoNotCall]
+        protected void __ActorSetManagedThreadId()
         {
 
             int threadId = Thread.CurrentThread.ManagedThreadId;
@@ -272,7 +294,7 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                __ActorSetManagedThreadId();
 
                 //ActorCheckRetainedTasks();
 
@@ -293,7 +315,7 @@ namespace ActSharp
 
             });
 
-            ActorTask at = new ActorTask(t, this);
+            ActorTask at = new ActorTask(t);
 
             __ActorEnqueue(t);
 
@@ -306,7 +328,7 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                __ActorSetManagedThreadId();
 
                 ActorPreDelegate();
 
@@ -331,7 +353,7 @@ namespace ActSharp
 
             });
 
-            ActorTask at = new ActorTask(t, this);
+            ActorTask at = new ActorTask(t);
 
             __ActorEnqueue(t);
 
@@ -346,7 +368,7 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                __ActorSetManagedThreadId();
 
                 ActorPreDelegate();
 
@@ -365,7 +387,7 @@ namespace ActSharp
 
             });
 
-            ActorTask at = new ActorTask(t, this);
+            ActorTask at = new ActorTask(t);
 
             __ActorEnqueue(t);
 
@@ -380,7 +402,7 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                __ActorSetManagedThreadId();
 
                 ActorPreDelegate();
 
@@ -405,7 +427,7 @@ namespace ActSharp
 
             });
 
-            ActorTask at = new ActorTask(t, this);
+            ActorTask at = new ActorTask(t);
 
             __ActorEnqueue(t);
 
@@ -420,7 +442,7 @@ namespace ActSharp
 
             Task<TResult> t = new Task<TResult>(() => {
 
-                SetManagedThreadId();
+                __ActorSetManagedThreadId();
 
                 //ActorCheckRetainedTasks();
 
@@ -441,7 +463,7 @@ namespace ActSharp
 
             });
 
-            ActorTask<TResult> at = new ActorTask<TResult>(t, this);
+            ActorTask<TResult> at = new ActorTask<TResult>(t);
 
             __ActorEnqueue(t);
 
@@ -454,7 +476,7 @@ namespace ActSharp
 
             Task<TResult> t = new Task<TResult>(() => {
 
-                SetManagedThreadId();
+                __ActorSetManagedThreadId();
 
                 //ActorCheckRetainedTasks();
 
@@ -483,7 +505,7 @@ namespace ActSharp
 
             });
 
-            ActorTask<TResult> at = new ActorTask<TResult>(t, this);
+            ActorTask<TResult> at = new ActorTask<TResult>(t);
 
             __ActorEnqueue(t);
 
@@ -498,7 +520,7 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                __ActorSetManagedThreadId();
 
                 try
                 {
@@ -515,7 +537,7 @@ namespace ActSharp
 
             });
 
-            ActorTask at = new ActorTask(t, this);
+            ActorTask at = new ActorTask(t);
 
             __ActorEnqueue(t);
 
@@ -530,7 +552,7 @@ namespace ActSharp
 
             Task t = new Task(() => {
 
-                SetManagedThreadId();
+                __ActorSetManagedThreadId();
 
                 try
                 {
@@ -553,7 +575,7 @@ namespace ActSharp
 
             });
 
-            ActorTask at = new ActorTask(t, this);
+            ActorTask at = new ActorTask(t);
 
             __ActorEnqueue(t);
 
@@ -568,7 +590,7 @@ namespace ActSharp
 
             Task<TResult> t = new Task<TResult>(() => {
 
-                SetManagedThreadId();
+                __ActorSetManagedThreadId();
 
                 try
                 {
@@ -585,230 +607,13 @@ namespace ActSharp
 
             });
 
-            ActorTask<TResult> at = new ActorTask<TResult>(t, this);
+            ActorTask<TResult> at = new ActorTask<TResult>(t);
 
             __ActorEnqueue(t);
 
             return at;
 
         }
-
-        //
-
-        //Actor Continuations
-
-        //Optional
-
-        //public virtual ActorTask Continue(Task withTask)
-        //{
-
-        //    throw new NotImplementedException();
-
-        //}
-
-        protected MethodInfo GetMethodToCall(string methodName, params Type[] parameterTypes)
-        {
-
-            Type t = this.GetType();
-
-            var info = t.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic, null, parameterTypes, null);
-
-            CheckCanCall(info);
-
-            return info;
-
-        }
-
-        protected void CheckCanCall(MethodInfo info)
-        {
-
-            var doNoCallAttr = info.GetCustomAttribute(typeof(DoNotCallAttribute));
-
-            if (doNoCallAttr != null)
-                throw new InvalidOperationException("Do not call a DoNotCallAttribute decoated method");
-
-        }
-
-        //protected MethodInfo GetMethodToCall(string methodName)
-        //{
-
-        //    Type t = this.GetType();
-
-        //    var info = t.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic);
-
-        //    return info;
-
-        //}
-
-        public virtual ActorTask Call(string methodName)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName);
-
-                info.Invoke(this, null);
-
-            });
-
-        }
-
-        public virtual ActorTask<T> CallResult<T>(string methodName)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName);
-
-                return (T)info.Invoke(this, null);
-
-            });
-
-        }
-
-        public virtual ActorTask Call(string methodName, Task withTask)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName, new Type[] { withTask.GetType() });
-
-                info.Invoke(this, new object[] { withTask });
-
-            });
-
-        }
-
-        public virtual ActorTask Call(string methodName, ActorTask withTask)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName, new Type[] { withTask.GetType() });
-
-                info.Invoke(this, new object[]{ withTask });
-
-            });
-
-        }
-
-        public virtual ActorTask<T> Call<T>(string methodName, Task<T> withTask)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName, new Type[] { withTask.GetType() });
-
-                return (T)info.Invoke(this, new object[] { withTask });
-
-            });
-
-        }
-
-        public virtual ActorTask<T> Call<T>(string methodName, ActorTask<T> withTask)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName, new Type[] { withTask.GetType() });
-
-                return (T)info.Invoke(this, new object[] { withTask });
-
-            });
-
-        }
-
-        public virtual ActorTask<T> Call<T>(string methodName, Task withTask)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName, new Type[] { withTask.GetType() });
-
-                return (T)info.Invoke(this, new object[] { withTask });
-
-            });
-
-        }
-
-        public virtual ActorTask<T> Call<T>(string methodName, ActorTask withTask)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName, new Type[] { withTask.GetType() });
-
-                return (T)info.Invoke(this, new object[] { withTask });
-
-            });
-
-        }
-
-        public virtual ActorTask CallNoResult<T>(string methodName, Task<T> withTask)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName, new Type[] { withTask.GetType() });
-
-                info.Invoke(this, new object[] { withTask });
-
-            });
-
-        }
-
-        public virtual ActorTask CallNoResult<T>(string methodName, ActorTask<T> withTask)
-        {
-
-            return ActorSetup(() =>
-            {
-
-                MethodInfo info = GetMethodToCall(methodName, new Type[] { withTask.GetType() });
-
-                info.Invoke(this, new object[] { withTask });
-
-            });
-
-        }
-
-        //
-
-        //protected void __ActorCheckIsSameAssembly()
-        //{
-
-        //    var assembly = this.GetType().Assembly;
-
-        //    StackTrace st = new StackTrace();
-
-        //    var frame1 = st.GetFrame(1); //Check previous frame
-
-        //    CheckFrame(frame1, assembly);
-
-        //    var frame2 = st.GetFrame(2); //Check "Outer" frame
-
-        //    CheckFrame(frame2, assembly);
-
-        //    //if (Assembly.GetCallingAssembly() != this.GetType().Assembly)
-        //    //    throw new InvalidOperationException("Do not call this method or property");
-
-        //}
-
-        //private void CheckFrame(StackFrame sf, Assembly assembly)
-        //{
-
-        //    if (sf.GetMethod().DeclaringType.Assembly != this.GetType().Assembly)
-        //        throw new InvalidOperationException("Do not call this method or property");
-
-        //}
 
         protected void __ActorCheckTask(Task task)
         {

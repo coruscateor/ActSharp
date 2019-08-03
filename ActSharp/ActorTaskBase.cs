@@ -14,20 +14,10 @@ namespace ActSharp
 
         protected TTask myTask;
 
-        public ActorTaskBase(TTask task, IActor actor)
+        public ActorTaskBase(TTask task)
         {
 
             myTask = task;
-
-            Actor = actor;
-
-        }
-
-        public IActor Actor
-        {
-
-            get;
-            private set;
 
         }
 
@@ -346,68 +336,6 @@ namespace ActSharp
             return myTask.Wait(timeout);
 
         }
-
-        //ActorTask Continuations
-
-        //Optional
-
-        //public Task<ActorTask> ContinueWith(Func<Task> func, Task withTask)
-        //{
-
-        //    //return Actor.Continue(withTask);
-
-        //    return myTask.ContinueWith(() => { return func(withTask); })
-
-        //}
-
-        //public virtual ActorTask Continue(ActorTask withTask)
-        //{
-
-        //    return Actor.Continue(withTask);
-
-        //}
-
-        //public virtual ActorTask<T> Continue<T>(Task<T> withTask)
-        //{
-
-        //    return Actor.Continue(withTask);
-
-        //}
-
-        //public virtual ActorTask<T> Continue<T>(ActorTask<T> withTask)
-        //{
-
-        //    return Actor.Continue(withTask);
-
-        //}
-
-        //public virtual ActorTask<T> Continue<T>(Task withTask)
-        //{
-
-        //    return Actor.Continue<T>(withTask);
-
-        //}
-
-        //public virtual ActorTask<T> Continue<T>(ActorTask withTask)
-        //{
-
-        //    return Actor.Continue<T>(withTask);
-
-        //}
-
-        //public virtual ActorTask ContinueNoResult<T>(Task<T> withTask)
-        //{
-
-        //    return Actor.ContinueNoResult(withTask);
-
-        //}
-
-        //public virtual ActorTask ContinueNoResult<T>(ActorTask<T> withTask)
-        //{
-
-        //    return Actor.ContinueNoResult(withTask);
-
-        //}
 
     }
 

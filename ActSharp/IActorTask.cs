@@ -24,26 +24,12 @@ namespace ActSharp
 
         }
 
-        //bool IsCompleted
-        //{
-
-        //    get;
-
-        //}
-
         bool IsCanceled
         {
 
             get;
 
         }
-
-        //object AsyncState
-        //{
-
-        //    get;
-
-        //}
 
         bool IsCompletedSuccessfully
         {
@@ -82,22 +68,6 @@ namespace ActSharp
         bool Wait(int millisecondsTimeout, CancellationToken cancellationToken);
 
         bool Wait(TimeSpan timeout);
-
-        //ActorTask Continue(Task withTask);
-
-        //ActorTask Continue(ActorTask withTask);
-
-        //ActorTask<T> Continue<T>(Task<T> withTask);
-
-        //ActorTask<T> Continue<T>(ActorTask<T> withTask);
-
-        //ActorTask<T> Continue<T>(Task withTask);
-
-        //ActorTask<T> Continue<T>(ActorTask withTask);
-
-        //ActorTask ContinueNoResult<T>(Task<T> withTask);
-
-        //ActorTask ContinueNoResult<T>(ActorTask<T> withTask);
 
     }
 

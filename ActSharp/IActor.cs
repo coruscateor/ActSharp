@@ -62,26 +62,6 @@ namespace ActSharp
 
         }
 
-        //
-
-        ActorTask Call(string methodName);
-
-        ActorTask Call(string methodName, Task withTask);
-
-        ActorTask Call(string methodName, ActorTask withTask);
-
-        ActorTask<T> Call<T>(string methodName, Task<T> withTask);
-
-        ActorTask<T> Call<T>(string methodName, ActorTask<T> withTask);
-
-        ActorTask<T> Call<T>(string methodName, Task withTask);
-
-        ActorTask<T> Call<T>(string methodName, ActorTask withTask);
-
-        ActorTask CallNoResult<T>(string methodName, Task<T> withTask);
-
-        ActorTask CallNoResult<T>(string methodName, ActorTask<T> withTask);
-
     }
 
 }

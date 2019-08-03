@@ -110,6 +110,11 @@ As indicated by the example ActSharp.Async is an extension method namespace for 
 
 ### Changelog:
 
+Version 0.5.0:
+
+* Added CActor and DictonaryContainer classes
+* Other changes etc
+
 Version 0.4.0:
 
 * Massive update to the ActSharp project; The ActorBase abstract class has been spun out of the Actor class to allow for other implementations of ActSharp based actors

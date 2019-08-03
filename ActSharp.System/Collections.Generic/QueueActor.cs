@@ -114,7 +114,7 @@ namespace ActSharp.System.Collections.Generic
 
                 task.Start();
 
-                ActorTask<(T, bool)> at = new ActorTask<(T, bool)>(task, this);
+                ActorTask<(T, bool)> at = new ActorTask<(T, bool)>(task);
 
                 return at;
 

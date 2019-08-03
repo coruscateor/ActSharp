@@ -24,7 +24,7 @@ namespace ActSharp
         {
         }
 
-        public override int ActorExecuteQueueCount
+        public sealed override int ActorExecuteQueueCount
         {
 
             get
@@ -36,7 +36,7 @@ namespace ActSharp
 
         }
 
-        public override bool ActorExecuteQueueIsEmpty
+        public sealed override bool ActorExecuteQueueIsEmpty
         {
 
             get
@@ -50,37 +50,37 @@ namespace ActSharp
 
         //The actor is active when it has a current task or is about to set the current task
 
-        public override bool ActorIsActive
-        {
+        //public override bool ActorIsActive
+        //{
 
-            get
-            {
+        //    get
+        //    {
 
-                bool taken = false;
+        //        bool taken = false;
 
-                myStateLock.Enter(ref taken);
+        //        myStateLock.Enter(ref taken);
 
-                try
-                {
+        //        try
+        //        {
 
-                    return myIsActive;
+        //            return myIsActive;
 
-                }
-                finally
-                {
+        //        }
+        //        finally
+        //        {
 
-                    if (taken)
-                        myStateLock.Exit();
+        //            if (taken)
+        //                myStateLock.Exit();
 
-                }
+        //        }
 
-            }
+        //    }
 
-        }
+        //}
 
         //Make sure actor is in the active state
 
-        protected override void __ActorSetInActive()
+        protected sealed override void __ActorSetInActive()
         {
 
             //if (assFrameChecker == null)
@@ -119,6 +119,8 @@ namespace ActSharp
 
             }
 
+            myOnIdleEvent.Set();
+
         }
 
         //private void SetTaskAndStart(Task nextTask)
@@ -148,20 +150,13 @@ namespace ActSharp
 
         //}
 
-        protected override void __ActorNextTask()
+        protected sealed override void __ActorNextTask()
         {
-
-            //__ActorCheckIsSameAssembly();
-
-            //if (assFrameChecker == null)
-            //    assFrameChecker = new AssFrameChecker(1);
 
             Task nextTask;
 
             if (myTaskQueue.TryDequeue(out nextTask))
             {
-
-                //SetTaskAndStart(nextTask);
 
                 nextTask.Start();
 
@@ -170,8 +165,6 @@ namespace ActSharp
             {
 
                 __ActorSetInActive();
-
-                myOnIdleEvent.Set();
 
             }
 
@@ -190,7 +183,7 @@ namespace ActSharp
 
         //}
 
-        protected override void __ActorEnqueue(Task task)
+        protected sealed override void __ActorEnqueue(Task task)
         {
 
             //if (assFrameChecker == null)
@@ -210,48 +203,6 @@ namespace ActSharp
                 __ActorNextTask();
 
             }
-
-        }
-
-        public static ActorTask Call(Func<Task, ActorTask> func, Task withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask Call(Func<ActorTask, ActorTask> func, ActorTask withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask<T> Call<T>(Func<Task<T>, ActorTask<T>> func, Task<T> withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask<T> Call<T>(Func<ActorTask<T>, ActorTask<T>> func, ActorTask<T> withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask<TR> Call<T, TR>(Func<Task<T>, ActorTask<TR>> func, Task<T> withTask)
-        {
-
-            return func(withTask);
-
-        }
-
-        public static ActorTask<TR> Call<T, TR>(Func<ActorTask<T>, ActorTask<TR>> func, ActorTask<T> withTask)
-        {
-
-            return func(withTask);
 
         }
 
